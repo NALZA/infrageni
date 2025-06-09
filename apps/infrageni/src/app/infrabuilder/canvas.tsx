@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { CanvasItem, Connection } from './types';
+import { Trash } from 'lucide-react';
 
 export function Canvas({
     items,
@@ -21,7 +22,7 @@ export function Canvas({
     setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>;
 }) {
     const [draggingFrom, setDraggingFrom] = useState<string | null>(null);
-    const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
+    const [dragPos, setDragPos] = useState<{ x: number, y: number } | null>(null);
     const svgRef = useRef<SVGSVGElement>(null);
 
     // Mouse event handlers for drag-to-connect
@@ -83,7 +84,7 @@ export function Canvas({
 
     // Item drag for position
     const [draggingItem, setDraggingItem] = useState<string | null>(null);
-    const [dragOffset, setDragOffset] = useState<{x: number, y: number} | null>(null);
+    const [dragOffset, setDragOffset] = useState<{ x: number, y: number } | null>(null);
     const handleItemDragStart = (e: React.MouseEvent, key: string) => {
         e.stopPropagation();
         setDraggingItem(key);
@@ -127,8 +128,14 @@ export function Canvas({
                                 <text x={(fromX + toX) / 2} y={(fromY + toY) / 2 - 5} fill="#6366f1" fontSize="12" textAnchor="middle">{conn.label}</text>
                             )}
                             {isConnectionSelected(conn.id) && (
-                                <rect x={((fromX + toX) / 2) - 16} y={((fromY + toY) / 2) - 24} width={32} height={18} rx={4} fill="#fff" stroke="#f59e42" strokeWidth={1} style={{ cursor: 'pointer' }} onClick={e => { e.stopPropagation(); handleConnectionDelete(conn.id); }} />
-                                /* Trash icon */
+                                <g>
+                                    <rect x={((fromX + toX) / 2) - 16} y={((fromY + toY) / 2) - 24} width={32} height={18} rx={4} fill="#fff" stroke="#f59e42" strokeWidth={1} style={{ cursor: 'pointer' }} onClick={e => { e.stopPropagation(); handleConnectionDelete(conn.id); }} />
+                                    <foreignObject x={((fromX + toX) / 2) - 16} y={((fromY + toY) / 2) - 24} width={32} height={18} style={{ pointerEvents: 'none' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                                            <Trash size={14} color="#f59e42" style={{ margin: 'auto' }} />
+                                        </div>
+                                    </foreignObject>
+                                </g>
                             )}
                         </g>
                     );

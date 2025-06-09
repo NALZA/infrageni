@@ -15,7 +15,7 @@ export type CanvasItem = {
 export type Connection = {
   id: string;
   from: string; // key of source CanvasItem
-  to: string;   // key of target CanvasItem
+  to: string; // key of target CanvasItem
   label?: string;
   properties?: {
     [key: string]: unknown;
