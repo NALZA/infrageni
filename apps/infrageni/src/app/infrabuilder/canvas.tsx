@@ -248,14 +248,14 @@ export function Canvas({
     return (
         <main
             ref={canvasContainerRef}
-            className="flex-1 bg-muted border rounded-lg relative min-h-[400px] overflow-hidden"
+            className="flex-1 glass-panel border rounded-lg relative min-h-[400px] overflow-hidden"
             onDrop={onDrop}
             onDragOver={onDragOver}
             onMouseMove={e => { handleMouseMove(e); handleItemDrag(e); }}
             onMouseUp={e => { handleMouseUp(e); handleItemDragEnd(); handleCanvasMouseUp(); }}
             onWheel={handleWheel}
-            onMouseDown={handleCanvasMouseDown} // Add onMouseDown to the main container
-            style={{ cursor: isPanning ? 'grabbing' : 'default' }} // Change cursor when panning
+            onMouseDown={handleCanvasMouseDown}
+            style={{ cursor: isPanning ? 'grabbing' : 'default' }}
         >
             {/* Toolbar */}
             <Toolbar
@@ -275,10 +275,10 @@ export function Canvas({
             <div
                 style={{
                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                    transformOrigin: 'top left', // Apply transform from top-left
-                    width: '100%', // Ensure it takes full space for panning calculations
+                    transformOrigin: 'top left',
+                    width: '100%',
                     height: '100%',
-                    position: 'absolute', // Needed for transformOrigin to work as expected with children
+                    position: 'absolute',
                 }}
             >
                 {/* Render SVG connections/arrows */}
