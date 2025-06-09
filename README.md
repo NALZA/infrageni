@@ -1,35 +1,23 @@
 # Infrageni
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+**Product Vision:** InfraGeni empowers developers, architects, and learners to visually design, understand, and provision cloud infrastructure with unprecedented ease and intelligence, bridging the gap between concept and code across multiple cloud providers.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+**Core Principles & Unique Selling Proposition (USP):**
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Visual-First Design:** Intuitive drag-and-drop interface for rapid system architecture creation.
+- **Multi-Cloud Agnostic:** Seamlessly toggle between major cloud providers (AWS, Azure, GCP initially) to design, compare, and understand provider-specific components.
+- **Intelligent Automation (AI-Powered):** AI assists in optimizing designs, generating accurate Infrastructure as Code, and actively teaching systems design principles.
+- **Learning & Development Focus:** Not just a design tool, but an educational platform for all levels of expertise.
+- **Production-Ready Output:** Generate high-quality, deployable IaC files directly from visual designs.
 
-## Finish your CI setup
+**Key Things to Always Keep in Mind (Guiding Principles):**
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/R55n0Z17p7)
-
-
-## Generate a library
-
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
-
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
+1. **Cloud Provider Toggle (CORE):** The ability to switch between AWS, Azure, GCP (and future providers) _at any point_ in the design process is paramount. This should influence component selection, IaC generation, and AI recommendations.
+2. **AI as an Intelligent Partner:** AI should be helpful, not intrusive. It should offer suggestions, validate designs, and teach, always with clear explanations and the user in control.
+3. **Accuracy and Reliability:** Generated IaC must be syntactically correct and semantically meaningful for the chosen cloud provider and IaC tool.
+4. **User Experience is King:** The drag-and-drop interface must be fluid, responsive, and visually appealing. Complex functionality should be accessible without overwhelming the user.
+5. **Extensibility and Future-Proofing:** Design the architecture to easily integrate new cloud services, IaC providers, and AI models as they emerge.
+6. **Educational Value:** Every feature, especially the AI, should contribute to the user's understanding and skill development in systems design.
 
 These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
 
@@ -65,7 +53,6 @@ npx nx sync:check
 
 [Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
 
-
 [Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
 ## Install Nx Console
@@ -78,12 +65,13 @@ Nx Console is an editor extension that enriches your developer experience. It le
 
 Learn more:
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
+- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 - [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 - [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 - [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
 
 And join the Nx community:
+
 - [Discord](https://go.nx.dev/community)
 - [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
 - [Our Youtube channel](https://www.youtube.com/@nxdevtools)
