@@ -37,6 +37,20 @@ const InfraBuilder = () => {
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
     const selectedItem = canvasItems.find((item) => item.key === selectedKey);
 
+    // When provider changes, update canvasItems' labels to match the new provider
+    React.useEffect(() => {
+        setCanvasItems((items) =>
+            items.map((item) => {
+                const component = GENERIC_COMPONENTS.find((c) => c.id === item.id);
+                if (!component) return item;
+                return {
+                    ...item,
+                    label: component.providerNames?.[provider] || component.label,
+                };
+            })
+        );
+    }, [provider]);
+
     return (
         <div className="flex flex-col h-[80vh] gap-4 p-8">
             <div className="flex flex-1 gap-4">

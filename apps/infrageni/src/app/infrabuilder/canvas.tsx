@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import type { CanvasItem, Connection } from './types';
 import { Trash } from 'lucide-react';
+import { Toolbar } from './toolbar';
 
 export function Canvas({
     items,
@@ -25,15 +26,44 @@ export function Canvas({
     const [dragPos, setDragPos] = useState<{ x: number, y: number } | null>(null);
     const svgRef = useRef<SVGSVGElement>(null);
 
+    // Toolbar state
+    const [connectMode, setConnectMode] = useState(false);
+    const [labelMode, setLabelMode] = useState(false);
+    // Placeholder for future box/group mode
+    // const [boxMode, setBoxMode] = useState(false);
+
     // Mouse event handlers for drag-to-connect
     const handleItemMouseDown = (e: React.MouseEvent, key: string) => {
         e.stopPropagation();
-        setDraggingFrom(key);
-        setDragPos({ x: e.clientX, y: e.clientY });
+        if (connectMode) {
+            setDraggingFrom(key);
+            // Use relative position for drag start
+            const canvasRect = (svgRef.current?.parentElement as HTMLElement)?.getBoundingClientRect();
+            setDragPos(canvasRect ? {
+                x: e.clientX - canvasRect.left,
+                y: e.clientY - canvasRect.top,
+            } : { x: e.clientX, y: e.clientY });
+        } else {
+            setDraggingItem(key);
+            const item = items.find(i => i.key === key);
+            if (item) {
+                setDragOffset({ x: e.clientX - item.x, y: e.clientY - item.y });
+            }
+            setSelectedKey(key);
+        }
     };
     const handleMouseMove = (e: React.MouseEvent) => {
         if (draggingFrom) {
-            setDragPos({ x: e.clientX, y: e.clientY });
+            // Get canvas bounding rect to calculate relative mouse position
+            const canvasRect = (svgRef.current?.parentElement as HTMLElement)?.getBoundingClientRect();
+            if (canvasRect) {
+                setDragPos({
+                    x: e.clientX - canvasRect.left,
+                    y: e.clientY - canvasRect.top,
+                });
+            } else {
+                setDragPos({ x: e.clientX, y: e.clientY });
+            }
         }
     };
     const handleMouseUp = (e: React.MouseEvent) => {
@@ -85,14 +115,6 @@ export function Canvas({
     // Item drag for position
     const [draggingItem, setDraggingItem] = useState<string | null>(null);
     const [dragOffset, setDragOffset] = useState<{ x: number, y: number } | null>(null);
-    const handleItemDragStart = (e: React.MouseEvent, key: string) => {
-        e.stopPropagation();
-        setDraggingItem(key);
-        const item = items.find(i => i.key === key);
-        if (item) {
-            setDragOffset({ x: e.clientX - item.x, y: e.clientY - item.y });
-        }
-    };
     const handleItemDrag = (e: React.MouseEvent) => {
         if (draggingItem && dragOffset) {
             setCanvasItems(items => items.map(it => it.key === draggingItem ? { ...it, x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y } : it));
@@ -111,15 +133,23 @@ export function Canvas({
             onMouseMove={e => { handleMouseMove(e); handleItemDrag(e); }}
             onMouseUp={e => { handleMouseUp(e); handleItemDragEnd(); }}
         >
+            {/* Toolbar */}
+            <Toolbar
+                connectMode={connectMode}
+                setConnectMode={setConnectMode}
+                labelMode={labelMode}
+                setLabelMode={setLabelMode}
+            />
             {/* Render SVG connections/arrows */}
             <svg ref={svgRef} className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1, pointerEvents: 'none' }}>
                 {connections.map((conn) => {
                     const from = items.find(i => i.key === conn.from);
                     const to = items.find(i => i.key === conn.to);
                     if (!from || !to) return null;
-                    const fromX = from.x + 60;
-                    const fromY = from.y + 20;
-                    const toX = to.x;
+                    // Calculate edge-to-edge connection
+                    const fromX = from.x + 120; // right edge (box width 120)
+                    const fromY = from.y + 20;  // vertical center (box height 40)
+                    const toX = to.x;           // left edge
                     const toY = to.y + 20;
                     return (
                         <g key={conn.id} style={{ cursor: 'pointer', pointerEvents: 'all' }} onClick={e => handleConnectionClick(e, conn.id)}>
@@ -144,10 +174,14 @@ export function Canvas({
                 {draggingFrom && dragPos && (() => {
                     const from = items.find(i => i.key === draggingFrom);
                     if (!from) return null;
-                    const fromX = from.x + 60;
+                    // Start at right edge of source (relative to canvas)
+                    const fromX = from.x + 120;
                     const fromY = from.y + 20;
+                    // End at cursor (relative to canvas)
+                    const toX = dragPos.x;
+                    const toY = dragPos.y;
                     return (
-                        <line x1={fromX} y1={fromY} x2={dragPos.x} y2={dragPos.y} stroke="#f59e42" strokeWidth={2} markerEnd="url(#arrowhead)" />
+                        <line x1={fromX} y1={fromY} x2={toX} y2={toY} stroke="#f59e42" strokeWidth={2} markerEnd="url(#arrowhead)" />
                     );
                 })()}
                 <defs>
@@ -166,18 +200,28 @@ export function Canvas({
                 <div
                     key={item.key}
                     id={`canvas-item-${item.key}`}
-                    className={`absolute px-3 py-2 rounded border bg-card shadow-md select-none ${selectedKey === item.key ? 'ring-2 ring-primary' : ''}`}
-                    style={{ left: item.x, top: item.y, zIndex: 2, cursor: draggingItem ? 'grabbing' : 'pointer' }}
-                    onMouseDown={e => {
-                        if (e.shiftKey) {
-                            handleItemMouseDown(e, item.key);
-                        } else {
-                            handleItemDragStart(e, item.key);
-                            setSelectedKey(item.key);
-                        }
+                    className={`absolute rounded border bg-card shadow-md select-none transition-all ${selectedKey === item.key ? 'ring-2 ring-primary' : ''}`}
+                    style={{
+                        left: item.x,
+                        top: item.y,
+                        minWidth: 80,
+                        maxWidth: 240,
+                        padding: '0.5rem 0.75rem',
+                        zIndex: 2,
+                        cursor: draggingItem ? 'grabbing' : connectMode ? 'crosshair' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        whiteSpace: 'pre-line',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        boxSizing: 'border-box',
+                        background: undefined,
                     }}
+                    onMouseDown={e => handleItemMouseDown(e, item.key)}
+                    title={item.label}
                 >
-                    {item.label}
+                    <span className="block w-full text-center break-words whitespace-pre-line" style={{overflowWrap: 'break-word'}}>{item.label}</span>
                 </div>
             ))}
         </main>
