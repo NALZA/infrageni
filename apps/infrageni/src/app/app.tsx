@@ -1,12 +1,11 @@
-import NxWelcome from './nx-welcome';
 import '../styles.css';
 
 import { Route, Routes, Link } from 'react-router-dom';
+import InfraBuilder from './infra-builder';
 
 export function App() {
   return (
     <div>
-      <NxWelcome title="infrageni" />
 
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}
@@ -21,6 +20,9 @@ export function App() {
           </li>
           <li>
             <Link to="/page-2">Page 2</Link>
+          </li>
+          <li>
+            <Link to="/infra-builder">Infra Builder</Link>
           </li>
         </ul>
       </div>
@@ -41,6 +43,10 @@ export function App() {
               <Link to="/">Click here to go back to root page.</Link>
             </div>
           }
+        />
+        <Route
+          path="/infra-builder"
+          element={<InfraBuilder />}
         />
       </Routes>
       {/* END: routes */}

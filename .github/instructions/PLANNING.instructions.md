@@ -37,24 +37,24 @@ Given your exciting idea for a drag-and-drop system design builder with AI capab
 Before diving deep into development, consider these research questions:
 
 - **Market & Competitors:**
-  - Who are the existing players in the drag-and-drop diagramming space (e.g., Draw.io, Lucidchart, Miro)? What are their strengths and weaknesses regarding system design?
-  - Are there existing tools that generate IaC from diagrams? How mature are they? What are their limitations?
-  - What are the unmet needs of architects and developers regarding system design tooling?
+    - Who are the existing players in the drag-and-drop diagramming space (e.g., Draw.io, Lucidchart, Miro)? What are their strengths and weaknesses regarding system design?
+    - Are there existing tools that generate IaC from diagrams? How mature are they? What are their limitations?
+    - What are the unmet needs of architects and developers regarding system design tooling?
 - **AI Capabilities & Data:**
-  - What specific types of system design problems are users most interested in having AI solve (e.g., cost optimization, security recommendations, scalability analysis)?
-  - What data sources would be required to train an AI for effective system design recommendations and teaching (e.g., public cloud best practices, open-source architecture patterns, existing system designs)?
-  - How will the AI learn and adapt to new technologies and evolving cloud provider offerings?
-  - What level of "trust" do users place in AI-generated designs, and how can we build that trust?
+    - What specific types of system design problems are users most interested in having AI solve (e.g., cost optimization, security recommendations, scalability analysis)?
+    - What data sources would be required to train an AI for effective system design recommendations and teaching (e.g., public cloud best practices, open-source architecture patterns, existing system designs)?
+    - How will the AI learn and adapt to new technologies and evolving cloud provider offerings?
+    - What level of "trust" do users place in AI-generated designs, and how can we build that trust?
 - **User Workflow & Preferences:**
-  - What level of detail do users typically start with when designing a system? High-level conceptual or highly specific component-based?
-  - What are the most common cloud providers and IaC tools users are working with today? (Prioritize initial support).
-  - How important is real-time collaboration in the design process?
-  - What level of customization and extensibility do users expect for components and templates?
+    - What level of detail do users typically start with when designing a system? High-level conceptual or highly specific component-based?
+    - What are the most common cloud providers and IaC tools users are working with today? (Prioritize initial support).
+    - How important is real-time collaboration in the design process?
+    - What level of customization and extensibility do users expect for components and templates?
 - **Technical Feasibility & Integration:**
-  - What are the technical challenges of parsing visual diagrams into a structured data model suitable for IaC generation and AI analysis?
-  - How will updates to cloud provider services and IaC schemas be managed and reflected in the application?
-  - What are the best practices for handling version control of designs and generated IaC?
-  - What existing open-source libraries or frameworks could be leveraged for diagramming, IaC parsing/generation, or AI model development?
+    - What are the technical challenges of parsing visual diagrams into a structured data model suitable for IaC generation and AI analysis?
+    - How will updates to cloud provider services and IaC schemas be managed and reflected in the application?
+    - What are the best practices for handling version control of designs and generated IaC?
+    - What existing open-source libraries or frameworks could be leveraged for diagramming, IaC parsing/generation, or AI model development?
 
 ### 3. Outlining Potential Application Features or Workflows
 
@@ -73,26 +73,26 @@ Before diving deep into development, consider these research questions:
 
 - **Cloud Provider Flavors:** Switch between AWS, Azure, GCP (and potentially others) to see equivalent components and recommendations.
 - **IaC Generation:**
-  - Terraform (primary focus due to popularity and multi-cloud support).
-  - CloudFormation (AWS-specific).
-  - Azure Resource Manager (ARM) templates.
-  - Kubernetes manifests (for containerized workloads).
+    - Terraform (primary focus due to popularity and multi-cloud support).
+    - CloudFormation (AWS-specific).
+    - Azure Resource Manager (ARM) templates.
+    - Kubernetes manifests (for containerized workloads).
 - **IaC Editor/Preview:** View and optionally edit the generated IaC within the application.
 - **IaC Validation:** Basic syntax validation of generated IaC.
 
 **AI-Powered Features:**
 
 - **AI Design Assistant:**
-  - **Architecture Suggestions:** Based on user input (e.g., "build a scalable web application," "highly available data pipeline"), the AI suggests initial architectures.
-  - **Component Recommendations:** Suggests relevant components as the user builds their design.
-  - **Optimization Recommendations:** Identifies potential cost savings, performance bottlenecks, or security improvements in existing designs.
-  - **Best Practices Flagging:** Warns users about common anti-patterns or deviations from cloud provider best practices.
+    - **Architecture Suggestions:** Based on user input (e.g., "build a scalable web application," "highly available data pipeline"), the AI suggests initial architectures.
+    - **Component Recommendations:** Suggests relevant components as the user builds their design.
+    - **Optimization Recommendations:** Identifies potential cost savings, performance bottlenecks, or security improvements in existing designs.
+    - **Best Practices Flagging:** Warns users about common anti-patterns or deviations from cloud provider best practices.
 - **AI Systems Design Educator:**
-  - **Guided Learning Paths:** Interactive lessons on core systems design concepts (e.g., CAP theorem, microservices, load balancing, security principles).
-  - **Design Review & Feedback:** User uploads a design (or builds one), and the AI provides a review, explaining pros and cons, suggesting improvements, and citing relevant principles.
-  - **Concept Explanations:** Hover-over or click-to-explain functionality for components, patterns, and architectural terms.
-  - **"What If" Scenarios:** AI can simulate the impact of design changes (e.g., "what if this component scales to 100,000 requests per second?").
-  - **Application Idea to Design:** User inputs a natural language description of an application, and the AI generates an initial system design.
+    - **Guided Learning Paths:** Interactive lessons on core systems design concepts (e.g., CAP theorem, microservices, load balancing, security principles).
+    - **Design Review & Feedback:** User uploads a design (or builds one), and the AI provides a review, explaining pros and cons, suggesting improvements, and citing relevant principles.
+    - **Concept Explanations:** Hover-over or click-to-explain functionality for components, patterns, and architectural terms.
+    - **"What If" Scenarios:** AI can simulate the impact of design changes (e.g., "what if this component scales to 100,000 requests per second?").
+    - **Application Idea to Design:** User inputs a natural language description of an application, and the AI generates an initial system design.
 
 **Workflow Examples:**
 
@@ -109,9 +109,9 @@ Before diving deep into development, consider these research questions:
 - **Component Customization vs. Simplicity:** Find the right balance between allowing users to customize components (e.g., custom icons) and keeping the interface uncluttered.
 - **Feedback & Error Handling:** Clear visual feedback during dragging, connecting, and especially during IaC generation (e.g., "Error: Missing required property").
 - **AI Integration UX:**
-  - How will AI suggestions be presented? (e.g., subtle hints, dedicated AI panel, pop-ups).
-  - How will users interact with the AI for teaching and reviews? (e.g., chat interface, dedicated analysis button).
-  - Transparency: Clearly indicate when a suggestion is AI-generated and why.
+    - How will AI suggestions be presented? (e.g., subtle hints, dedicated AI panel, pop-ups).
+    - How will users interact with the AI for teaching and reviews? (e.g., chat interface, dedicated analysis button).
+    - Transparency: Clearly indicate when a suggestion is AI-generated and why.
 - **Cloud Provider Branding:** How to visually differentiate between AWS, Azure, GCP components while maintaining a cohesive look.
 - **Responsive Design:** Consider whether this will be a desktop application, web application, or both. If web, ensure it's usable on various screen sizes (though complex diagramming is often better on larger screens).
 - **Save & Load Mechanism:** Intuitive ways to save designs locally and potentially to cloud storage.
@@ -121,27 +121,27 @@ Before diving deep into development, consider these research questions:
 This is where flexibility is key, but some initial thoughts:
 
 - **Frontend (Web Application):**
-  - **React/Vue/Angular:** Modern JavaScript frameworks are ideal for complex UIs and interactive components.
-  - **State Management:** Redux, Zustand, Vuex, or similar for managing application state (component properties, connections, AI suggestions).
-  - **Diagramming Library:** Consider existing libraries like Konva.js, Fabric.js, GoJS, JointJS, or developing a custom SVG/Canvas-based solution for maximum control.
+    - **React/Vue/Angular:** Modern JavaScript frameworks are ideal for complex UIs and interactive components.
+    - **State Management:** Redux, Zustand, Vuex, or similar for managing application state (component properties, connections, AI suggestions).
+    - **Diagramming Library:** Consider existing libraries like Konva.js, Fabric.js, GoJS, JointJS, or developing a custom SVG/Canvas-based solution for maximum control.
 - **Backend (for AI and IaC processing):**
-  - **Microservices Architecture:** Good for isolating concerns (diagram parsing, IaC generation, AI model serving, authentication).
-  - **Language:** Python (excellent for AI/ML), Node.js (good for I/O bound tasks and web services), Go (for high performance and concurrency).
-  - **API Gateway:** For managing external API access and security.
-  - **Containerization (Docker) & Orchestration (Kubernetes):** For scalable deployment of backend services.
+    - **Microservices Architecture:** Good for isolating concerns (diagram parsing, IaC generation, AI model serving, authentication).
+    - **Language:** Python (excellent for AI/ML), Node.js (good for I/O bound tasks and web services), Go (for high performance and concurrency).
+    - **API Gateway:** For managing external API access and security.
+    - **Containerization (Docker) & Orchestration (Kubernetes):** For scalable deployment of backend services.
 - **AI/ML Infrastructure:**
-  - **Dedicated ML Frameworks:** TensorFlow, PyTorch.
-  - **Cloud ML Services:** AWS SageMaker, Azure ML, GCP AI Platform for training, deployment, and inference.
-  - **Knowledge Graph/Ontology:** To represent system design concepts, components, and relationships for the AI.
+    - **Dedicated ML Frameworks:** TensorFlow, PyTorch.
+    - **Cloud ML Services:** AWS SageMaker, Azure ML, GCP AI Platform for training, deployment, and inference.
+    - **Knowledge Graph/Ontology:** To represent system design concepts, components, and relationships for the AI.
 - **Data Storage:**
-  - **Relational Database (PostgreSQL):** For user data, saved designs (metadata), component libraries.
-  - **NoSQL Database (MongoDB/DynamoDB):** Potentially for storing complex design structures or AI training data.
+    - **Relational Database (PostgreSQL):** For user data, saved designs (metadata), component libraries.
+    - **NoSQL Database (MongoDB/DynamoDB):** Potentially for storing complex design structures or AI training data.
 - **Infrastructure as Code (IaC) Generation:**
-  - **Templating Engines:** Jinja2 (Python), Handlebars (JS) for generating IaC files from structured data.
-  - **IaC Parsers/Validators:** Leverage open-source tools or build custom parsers to understand IaC schemas.
+    - **Templating Engines:** Jinja2 (Python), Handlebars (JS) for generating IaC files from structured data.
+    - **IaC Parsers/Validators:** Leverage open-source tools or build custom parsers to understand IaC schemas.
 - **Design for Extensibility:**
-  - **Plugin Architecture:** Allow users (or you) to add new components, cloud providers, or IaC generators easily.
-  - **Clear API Boundaries:** Define clear APIs between frontend and backend services.
+    - **Plugin Architecture:** Allow users (or you) to add new components, cloud providers, or IaC generators easily.
+    - **Clear API Boundaries:** Define clear APIs between frontend and backend services.
 
 ### 6. Identifying Relevant Risks, Unknowns, or Dependencies
 
