@@ -8,17 +8,30 @@ import { customShapeUtils, createComponentShape } from './shapes';
 function DropZone() {
     const editor = useEditor();
     const provider = useProvider();
-    
-    React.useEffect(() => {
+      React.useEffect(() => {
+        let isDropping = false; // Flag to prevent multiple drops
+        
         const handleDrop = (e: DragEvent) => {
             const compId = e.dataTransfer?.getData('application/x-infrageni-component');
             if (!compId) return;
             
+            // Prevent multiple simultaneous drops
+            if (isDropping) {
+                console.log('Drop already in progress, ignoring');
+                return;
+            }
+            
             e.preventDefault();
             e.stopPropagation(); // Prevent event bubbling that might cause duplicates
+            e.stopImmediatePropagation(); // Prevent other handlers on the same element
+            
+            isDropping = true;
             
             const comp = GENERIC_COMPONENTS.find(c => c.id === compId);
-            if (!comp) return;
+            if (!comp) {
+                isDropping = false;
+                return;
+            }
             
             // Get the viewport position and convert to page coordinates
             const point = editor.screenToPage({ x: e.clientX, y: e.clientY });
@@ -26,6 +39,11 @@ function DropZone() {
             // Create the appropriate custom shape
             const shape = createComponentShape(comp, point.x, point.y, provider);
             editor.createShape(shape);
+            
+            // Reset the flag after a short delay
+            setTimeout(() => {
+                isDropping = false;
+            }, 100);
         };
 
         const handleDragOver = (e: DragEvent) => {
