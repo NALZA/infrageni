@@ -1,4 +1,3 @@
-import React from 'react';
 import { GenericComponent, useProvider } from './components';
 
 export function ComponentLibrary({
@@ -7,14 +6,12 @@ export function ComponentLibrary({
     setFavorites,
     search,
     setSearch,
-    onDragStart,
 }: {
     components: GenericComponent[];
     favorites: string[];
     setFavorites: (favs: string[]) => void;
     search: string;
     setSearch: (s: string) => void;
-    onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
 }) {
     const provider = useProvider();
     // Filter and sort
@@ -41,7 +38,9 @@ export function ComponentLibrary({
                     <div
                         key={comp.id}
                         draggable
-                        onDragStart={e => onDragStart(e, comp.id)}
+                        onDragStart={e => {
+                            e.dataTransfer.setData('application/x-infrageni-component', comp.id);
+                        }}
                         className={`cursor-move px-3 py-2 rounded border bg-muted hover:bg-accent transition flex items-center justify-between ${favorites.includes(comp.id) ? 'border-yellow-400' : ''}`}
                     >
                         <span>{comp.providerNames[provider] || comp.label}</span>
