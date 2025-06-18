@@ -7,6 +7,7 @@ import { BaseInfraShapeProps } from './shapes/base';
 import { Toolbar } from './toolbar';
 import { ExportDialog } from './export';
 import { ConnectionGuide } from './connection-guide';
+import { useTldrawThemeSync } from '../lib/use-tldraw-theme-sync';
 
 // Helper function to check if a point is inside a bounding box shape
 function isPointInBoundingBox(point: { x: number; y: number }, shape: TLShape): boolean {
@@ -153,6 +154,10 @@ function ContainerMovementHandler() {
 function DropZone() {
     const editor = useEditor();
     const provider = useProvider();
+    
+    // Sync tldraw theme with our application theme
+    useTldrawThemeSync();
+    
     // Toolbar state
     const [connectMode, setConnectMode] = React.useState(false);
     const [labelMode, setLabelMode] = React.useState(false);
