@@ -15,8 +15,8 @@ export function App() {
           <Route
             path="/"
             element={
-              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-8">
-                <div className="glass-card glass-card-hover max-w-md w-full p-8 text-center">
+              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-4 sm:p-6 md:p-8">
+                <div className="glass-card glass-card-hover max-w-md w-full p-4 sm:p-6 md:p-8 text-center">
                   <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                     Welcome to InfraGeni
                   </h1>
@@ -36,8 +36,8 @@ export function App() {
           <Route
             path="/page-2"
             element={
-              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-8">
-                <div className="glass-card glass-card-hover max-w-md w-full p-8 text-center">
+              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] p-4 sm:p-6 md:p-8">
+                <div className="glass-card glass-card-hover max-w-md w-full p-4 sm:p-6 md:p-8 text-center">
                   <h1 className="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-primary bg-clip-text text-transparent">
                     Page 2
                   </h1>
