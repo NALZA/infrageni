@@ -1,6 +1,258 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  /* ===== COLOR SYSTEM ===== */
+  
+  /* Primary Colors */
+  --color-primary: #6366f1;
+  --color-primary-hover: #5855f8;
+  --color-primary-foreground: #ffffff;
+    /* Glass Colors - Light Mode */
+  --color-glass-light: rgba(255, 255, 255, 0.25);
+  --color-glass-light-hover: rgba(255, 255, 255, 0.35);
+  --color-glass-light-border: rgba(255, 255, 255, 0.4);
+  --color-glass-light-text: rgba(0, 0, 0, 0.9);
+  --color-glass-light-text-muted: rgba(0, 0, 0, 0.7);
+  
+  /* Glass Colors - Dark Mode */
+  --color-glass-dark: rgba(16, 16, 16, 0.3);
+  --color-glass-dark-hover: rgba(16, 16, 16, 0.4);
+  --color-glass-dark-border: rgba(255, 255, 255, 0.1);
+  --color-glass-dark-text: rgba(255, 255, 255, 0.95);
+  --color-glass-dark-text-muted: rgba(255, 255, 255, 0.75);
+  
+  /* Background Colors */
+  --color-background-light: #f8fafc;
+  --color-background-dark: #0f172a;
+  --color-background-gradient-light: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color-background-gradient-dark: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
+  --color-background-mesh-light: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(120, 219, 226, 0.3) 0%, transparent 50%);
+  --color-background-mesh-dark: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 50%);
+  
+  /* ===== SHADOWS ===== */
+  
+  /* Glass Shadows */
+  --shadow-glass-sm: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-glass-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-glass-xl: 0 12px 48px rgba(0, 0, 0, 0.15), 0 6px 24px rgba(0, 0, 0, 0.1);
+  
+  /* Colored Shadows */
+  --shadow-primary: 0 4px 20px rgba(99, 102, 241, 0.3);
+  --shadow-primary-lg: 0 8px 32px rgba(99, 102, 241, 0.4);
+  
+  /* ===== BORDER RADIUS ===== */
+  --radius-glass-xs: 0.5rem;
+  --radius-glass-sm: 0.75rem;
+  --radius-glass: 1rem;
+  --radius-glass-lg: 1.25rem;
+  --radius-glass-xl: 1.5rem;
+  --radius-glass-2xl: 2rem;
+  
+  /* ===== BACKDROP BLUR ===== */
+  --backdrop-blur-glass-xs: 4px;
+  --backdrop-blur-glass-sm: 6px;
+  --backdrop-blur-glass: 8px;
+  --backdrop-blur-glass-lg: 12px;
+  --backdrop-blur-glass-xl: 16px;
+  --backdrop-blur-glass-2xl: 24px;
+  
+  /* ===== ANIMATION DURATIONS ===== */
+  --duration-glass: 200ms;
+  --duration-glass-slow: 300ms;
+  
+  /* ===== SPACING FOR GLASS ELEMENTS ===== */
+  --spacing-glass-border: 1px;
+  --spacing-glass-border-thick: 2px;
+}
+
+/* ===== GLASS MORPHISM UTILITIES ===== */
+
+@utility glass-light {
+  background: var(--color-glass-light);
+  backdrop-filter: blur(var(--backdrop-blur-glass));
+  border: var(--spacing-glass-border) solid var(--color-glass-light-border);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+@utility glass-dark {
+  background: var(--color-glass-dark);
+  backdrop-filter: blur(var(--backdrop-blur-glass));
+  border: var(--spacing-glass-border) solid var(--color-glass-dark-border);
+  border-radius: var(--radius-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(var(--backdrop-blur-glass));
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-glass-lg);
+  box-shadow: var(--shadow-glass-lg);
+  transition: all var(--duration-glass) ease-in-out;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.dark .glass-card {
+  background: var(--color-glass-dark);
+  border-color: var(--color-glass-dark-border);
+}
+
+@utility glass-card-hover {
+  &:hover {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-glass-xl);
+    transform: translateY(-2px);
+  }
+}
+
+.dark .glass-card-hover:hover {
+  background: var(--color-glass-dark-hover);
+}
+
+@utility glass-navbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(var(--backdrop-blur-glass-lg));
+  border-bottom: var(--spacing-glass-border) solid rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.dark .glass-navbar {
+  background: rgba(16, 16, 16, 0.8);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+@utility glass-button {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(var(--backdrop-blur-glass-sm));
+  border: var(--spacing-glass-border) solid rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-glass-sm);
+  padding: 0.5rem 1rem;
+  transition: all var(--duration-glass) ease-in-out;
+  color: rgba(0, 0, 0, 0.9);
+  font-weight: 500;
+}
+
+.dark .glass-button {
+  background: var(--color-glass-dark);
+  border-color: var(--color-glass-dark-border);
+  color: var(--color-glass-dark-text);
+}
+
+@utility glass-button-hover {
+  &:hover {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glass);
+    color: rgba(0, 0, 0, 0.95);
+  }
+}
+
+.dark .glass-button-hover:hover {
+  background: var(--color-glass-dark-hover);
+}
+
+@utility glass-input {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(var(--backdrop-blur-glass-sm));
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-glass-sm);
+  color: var(--color-glass-light-text);
+}
+
+.dark .glass-input {
+  background: var(--color-glass-dark);
+  border-color: var(--color-glass-dark-border);
+  color: var(--color-glass-dark-text);
+}
+
+.glass-input::placeholder {
+  color: var(--color-glass-light-text-muted);
+}
+
+.dark .glass-input::placeholder {
+  color: var(--color-glass-dark-text-muted);
+}
+
+@utility glass-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(var(--backdrop-blur-glass-xl));
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-glass-xl);
+  box-shadow: var(--shadow-glass-xl);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.dark .glass-modal {
+  background: rgba(16, 16, 16, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@utility animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@utility animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+@utility animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ===== RESPONSIVE GLASS EFFECTS ===== */
+
+@media (max-width: 768px) {
+  .glass-navbar {
+    backdrop-filter: blur(8px);
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(6px);
+  }
+  
+  .glass-modal {
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card-hover:hover {
+    transform: none;
+  }
+  
+  .glass-button-hover:hover {
+    transform: none;
+  }
+  
+  .animate-float,
+  .animate-glow,
+  .animate-shimmer {
+    animation: none;
+  }
+}
 
 /* Mermaid diagram styles */
 .mermaid-container svg {
@@ -25,4 +277,100 @@
 
 .dialog-overlay * {
   position: relative;
+}
+
+/* ===== TLDRAW Z-INDEX OVERRIDES ===== */
+
+/* Ensure ALL tldraw UI elements stay below our dropdowns */
+[class*="tlui-"],
+.tlui-layout__top__right,
+.tlui-style-panel,
+.tlui-style-panel__wrapper,
+.tlui-toolbar,
+.tlui-toolbar__inner,
+.tlui-panel,
+.tlui-panel__header,
+.tlui-panel__content,
+.tlui-layout__top,
+.tlui-layout__top__left,
+.tlui-layout__top__center,
+.tlui-layout__bottom,
+.tlui-layout__bottom__main,
+.tlui-layout__mobile {
+  z-index: 100 !important;
+}
+
+/* Provider selector z-index priority - much higher to ensure it's above everything */
+.provider-selector-backdrop {
+  z-index: 50000 !important;
+  position: fixed !important;
+}
+
+.provider-selector-dropdown {
+  z-index: 50001 !important;
+  position: absolute !important;
+}
+
+/* ===== BACKGROUND PATTERNS ===== */
+
+@utility bg-mesh-light {
+  background: var(--color-background-light);
+  background-image: var(--color-background-mesh-light);
+}
+
+@utility bg-mesh-dark {
+  background: var(--color-background-dark);
+  background-image: var(--color-background-mesh-dark);
+}
+
+@utility bg-gradient-glass {
+  background: var(--color-background-gradient-light);
+}
+
+.dark .bg-gradient-glass {
+  background: var(--color-background-gradient-dark);
+}
+
+/* ===== DARK MODE ROOT SETUP ===== */
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(16, 16, 16, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

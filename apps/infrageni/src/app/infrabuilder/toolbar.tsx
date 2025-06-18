@@ -21,7 +21,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 }) => {
     const toolbarButton = (active: boolean, onClick: () => void, label: string) => (
         <button
-            className={`px-3 py-1 rounded border bg-background shadow text-sm font-medium ${active ? 'bg-primary text-primary-foreground' : ''}`}
+            className={`px-3 py-1 rounded-sm border bg-background shadow-sm text-sm font-medium ${active ? 'bg-primary text-primary-foreground' : ''}`}
             onClick={onClick}
             type="button"
         >
@@ -31,7 +31,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
     const actionButton = (onClick: () => void, label: string, variant: 'primary' | 'secondary' = 'primary') => (
         <button
-            className={`px-3 py-1 rounded border shadow text-sm font-medium ${variant === 'primary'
+            className={`px-3 py-1 rounded-sm border shadow-sm text-sm font-medium ${variant === 'primary'
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
@@ -41,7 +41,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {label}
         </button>
     ); return (
-        <div className="absolute top-0 left-0 w-full z-20 flex items-center justify-between bg-card border-b rounded-t-lg shadow px-4 py-2" style={{ minHeight: 48 }}>
+        <div className="absolute top-0 left-0 w-full z-20 flex items-center justify-between bg-card border-b rounded-t-lg shadow-sm px-4 py-2" style={{ minHeight: 48 }}>
             {/* Left section - Mode toggles */}
             <div className="flex items-center gap-2">
                 {toolbarButton(connectMode, () => setConnectMode(!connectMode), 'Connect')}

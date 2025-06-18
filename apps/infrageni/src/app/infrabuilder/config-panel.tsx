@@ -17,7 +17,7 @@ export function ConfigPanel({
     // Detect if selectedItem is a connection
     const isConnection = (item: unknown): item is Connection => !!item && typeof item === 'object' && 'from' in item && 'to' in item;
     return (
-        <aside className="w-80 bg-card border rounded-lg p-4 flex-shrink-0 flex flex-col">
+        <aside className="w-80 bg-card border rounded-lg p-4 shrink-0 flex flex-col">
             <h2 className="text-lg font-semibold mb-2">Configuration</h2>
             <div className="flex-1 text-muted-foreground">
                 {selectedItem ? (
@@ -27,7 +27,7 @@ export function ConfigPanel({
                             <label className="block text-sm font-medium">Label</label>
                             <input
                                 type="text"
-                                className="w-full px-2 py-1 border rounded bg-background text-foreground mb-2"
+                                className="w-full px-2 py-1 border rounded-sm bg-background text-foreground mb-2"
                                 value={selectedItem.label || ''}
                                 onChange={e => {
                                     const value = e.target.value;
@@ -45,7 +45,7 @@ export function ConfigPanel({
                                     <label className="block text-sm font-medium">Instance Type</label>
                                     <input
                                         type="text"
-                                        className="w-full px-2 py-1 border rounded bg-background text-foreground mb-2"
+                                        className="w-full px-2 py-1 border rounded-sm bg-background text-foreground mb-2"
                                         value={selectedItem.properties?.instanceType || ''}
                                         onChange={e => {
                                             const value = e.target.value;
@@ -56,7 +56,7 @@ export function ConfigPanel({
                                     <label className="block text-sm font-medium">Region</label>
                                     <input
                                         type="text"
-                                        className="w-full px-2 py-1 border rounded bg-background text-foreground"
+                                        className="w-full px-2 py-1 border rounded-sm bg-background text-foreground"
                                         value={selectedItem.properties?.region || ''}
                                         onChange={e => {
                                             const value = e.target.value;
@@ -71,7 +71,7 @@ export function ConfigPanel({
                                     <label className="block text-sm font-medium">Engine</label>
                                     <input
                                         type="text"
-                                        className="w-full px-2 py-1 border rounded bg-background text-foreground mb-2"
+                                        className="w-full px-2 py-1 border rounded-sm bg-background text-foreground mb-2"
                                         value={selectedItem.properties?.engine || ''}
                                         onChange={e => {
                                             const value = e.target.value;
@@ -82,7 +82,7 @@ export function ConfigPanel({
                                     <label className="block text-sm font-medium">Region</label>
                                     <input
                                         type="text"
-                                        className="w-full px-2 py-1 border rounded bg-background text-foreground"
+                                        className="w-full px-2 py-1 border rounded-sm bg-background text-foreground"
                                         value={selectedItem.properties?.region || ''}
                                         onChange={e => {
                                             const value = e.target.value;

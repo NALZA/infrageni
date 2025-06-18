@@ -87,7 +87,7 @@ export function MermaidPreview({ content, className = '' }: MermaidPreviewProps)
             <div className={`p-4 ${className}`}>
                 <div className="text-red-600 text-sm">
                     <div className="font-medium mb-2">Diagram Rendering Error:</div>
-                    <div className="font-mono text-xs bg-red-50 p-2 rounded border">
+                    <div className="font-mono text-xs bg-red-50 p-2 rounded-sm border">
                         {error}
                     </div>
                 </div>

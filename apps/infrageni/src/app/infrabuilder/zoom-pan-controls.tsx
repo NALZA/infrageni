@@ -27,7 +27,7 @@ export const ZoomPanControls: React.FC<ZoomPanControlsProps> = ({
             <Button variant="outline" size="icon" onClick={onResetView} title="Reset View">
                 <Maximize className="h-4 w-4" />
             </Button>
-            <div className="text-xs text-center bg-background/80 px-2 py-1 rounded">
+            <div className="text-xs text-center bg-background/80 px-2 py-1 rounded-sm">
                 {Math.round(currentZoom * 100)}%
             </div>
         </div>

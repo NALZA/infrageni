@@ -106,7 +106,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                                 </label>                <select
                                     value={selectedFormat}
                                     onChange={(e) => handleFormatChange(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                                 >
                                     {availableFormats.map((format) => (
                                         <option key={format.id} value={format.id}>
@@ -134,20 +134,20 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                                     value={filename}
                                     onChange={(e) => setFilename(e.target.value)}
                                     placeholder={`infrastructure-diagram.${selectedFormatInfo?.extension}`}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div className="space-y-2">
                                 <button
                                     onClick={handlePreview}
-                                    className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                    className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-hidden focus:ring-2 focus:ring-gray-500"
                                 >
                                     Preview
                                 </button>
                                 <button
                                     onClick={handleDownload}
-                                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                                 >
                                     Download
                                 </button>
@@ -219,7 +219,7 @@ export function ExportDialog({ isOpen, onClose }: ExportDialogProps) {
                 <div className="p-6 border-t bg-gray-50 flex justify-end space-x-4">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-gray-500"
                     >
                         Cancel
                     </button>
