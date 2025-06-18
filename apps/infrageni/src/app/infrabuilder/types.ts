@@ -8,11 +8,17 @@ export type CanvasItem = {
   isBoundingBox?: boolean; // Whether this item can contain other items
   children?: string[]; // IDs of contained items (for bounding box types)
   properties?: {
+    w?: number; // Width of the shape
+    h?: number; // Height of the shape
     instanceType?: string;
     region?: string;
     engine?: string;
     cidrBlock?: string; // For VPC/subnet CIDR blocks
+    color?: string;
+    opacity?: number;
+    componentId?: string;
     // Add more fields as needed for other component types
+    [key: string]: unknown; // Allow additional properties
   };
 };
 
