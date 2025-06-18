@@ -18,7 +18,7 @@ export function Navbar({ className }: { className?: string }) {
         }
     };
     return (
-        <nav className={cn("w-full bg-card border-b px-6 py-3 flex items-center justify-between", className)}>
+        <nav className={cn("w-full px-6 py-3 flex items-center justify-between hero-glass", className)}>
             <div className="flex items-center gap-4">
                 <span className="font-bold text-lg tracking-tight">InfraGeni</span>
                 <Link to="/" className="hover:underline text-muted-foreground">Home</Link>

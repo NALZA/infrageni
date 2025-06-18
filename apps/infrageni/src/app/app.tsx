@@ -6,7 +6,7 @@ import Navbar from './components/navbar/navbar';
 
 export function App() {
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       <Navbar />
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}

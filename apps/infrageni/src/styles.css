@@ -3,38 +3,48 @@
 @tailwind utilities;
 
 body {
-  background-image: linear-gradient(180deg, #232325 0%, #0d1d25 100%);
+  background-image: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   background-size: cover;
   background-attachment: fixed;
   min-height: 100vh;
+  color: #374151; /* text-gray-700 */
+}
+
+.dark body {
+  background-image: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
   color: #e5e5e5;
 }
 
-.app-glass {
-  background: rgba(255,255,255,0.15);
-  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.12);
-  backdrop-filter: blur(8px);
+.app-glass, .glass-panel {
+  background-color: theme('colors.glass');
+  box-shadow: theme('boxShadow.glass');
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: theme('borderRadius.glass');
+}
+
+.dark .app-glass, .dark .glass-panel {
+  background-color: theme('colors.glass-dark');
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px); /* Duplicated intentionally as per instructions to update for dark variant */
+}
+
+.hero-glass {
+  background-color: theme('colors.glass');
+  backdrop-filter: blur(16px);
+  border-radius: theme('borderRadius.glass'); /* Or 1.75rem if it looks better */
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.15);
   border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 1.5rem;
+  border-left-color: theme('colors.primary / 0.7');
+  border-top-color: theme('colors.primary / 0.7');
 }
 
-.dark .app-glass {
-  background: rgba(30,30,30,0.35);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Utility for glassmorphism panels */
-.glass-panel {
-  background: rgba(255,255,255,0.15);
-  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.12);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 1.5rem;
-}
-
-.dark .glass-panel {
-  background: rgba(30,30,30,0.35);
-  border: 1px solid rgba(255,255,255,0.1);
+.dark .hero-glass {
+  background-color: theme('colors.glass-dark');
+  border-color: rgba(255,255,255,0.15);
+  border-left-color: theme('colors.primary / 0.5');
+  border-top-color: theme('colors.primary / 0.5');
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.20);
 }
 
 /* You can add global styles to this file, and also import other style files */
