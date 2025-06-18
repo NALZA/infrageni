@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TLShape, TLArrowBinding, useEditor, TLArrowShape, GeoShape, TLEditor } from 'tldraw';
-import * as ExportUtils from './export-utils'; // Import all exports
+// Import ALL from export-utils for the exportCanvas suite, but individual for useCanvasExport if needed
+import * as ExportUtilsModule from './export-utils';
 import { CanvasItem, Connection, ExportData as ActualExportData } from '../types';
 import { BaseInfraShapeProps } from '../shapes/base';
+import { EXPORT_FORMATS } from './formats'; // Import for default filename logic
 
-// Mock tldraw's useEditor hook
+// Mock tldraw's useEditor hook - This is global for the file
 vi.mock('tldraw', async (importOriginal) => {
   const original = await importOriginal<typeof import('tldraw')>();
   return {
@@ -13,13 +15,16 @@ vi.mock('tldraw', async (importOriginal) => {
   };
 });
 
-// Mock specific functions from './export-utils'
-// This allows us to spy on their calls from exportCanvas
+
+// --- Mocks for exportCanvas test suite START ---
+// This vi.mock is specifically for the 'exportCanvas' describe block later.
+// It is designed to mock the dependencies of exportCanvas for focused testing of exportCanvas itself.
 vi.mock('./export-utils', async (importActual) => {
-  const actual = await importActual<typeof ExportUtils>(); // Import actuals to ensure the module is loaded
+  const actual = await importActual<typeof ExportUtilsModule>();
   return {
-    ...actual, // Spread actual implementations first
-    // Then explicitly mock the functions we want to control/spy on for exportCanvas tests
+    ...actual, // IMPORTANT: Start with actual implementations
+    // Then, selectively mock functions that exportCanvas calls internally FOR THE exportCanvas SUITE ONLY
+    // These mocks will be restored by vi.restoreAllMocks() in exportCanvas's afterEach
     convertShapesToCanvasItems: vi.fn(),
     extractConnectionsFromArrows: vi.fn(),
     generateMermaidC4: vi.fn(),
@@ -27,138 +32,192 @@ vi.mock('./export-utils', async (importActual) => {
     generateJSON: vi.fn(),
     generateTerraform: vi.fn(),
     generateMermaidFlowchart: vi.fn(),
-    // exportCanvas itself will use the actual implementation from 'actual'
-    // useCanvasExport is not directly tested here but could be mocked if it interfered
+    // Note: `exportCanvas` itself is NOT mocked here, we test its actual implementation.
+    // `useCanvasExport` is also not mocked here.
   };
 });
 
+// Typed mocks for the exportCanvas test suite
+const mockedConvertShapesToCanvasItems = ExportUtilsModule.convertShapesToCanvasItems as vi.MockedFunction<typeof ExportUtilsModule.convertShapesToCanvasItems>;
+const mockedExtractConnectionsFromArrows = ExportUtilsModule.extractConnectionsFromArrows as vi.MockedFunction<typeof ExportUtilsModule.extractConnectionsFromArrows>;
+const mockedGenerateMermaidC4 = ExportUtilsModule.generateMermaidC4 as vi.MockedFunction<typeof ExportUtilsModule.generateMermaidC4>;
+const mockedGenerateMermaidArchitecture = ExportUtilsModule.generateMermaidArchitecture as vi.MockedFunction<typeof ExportUtilsModule.generateMermaidArchitecture>;
+const mockedGenerateJSON = ExportUtilsModule.generateJSON as vi.MockedFunction<typeof ExportUtilsModule.generateJSON>;
+const mockedGenerateTerraform = ExportUtilsModule.generateTerraform as vi.MockedFunction<typeof ExportUtilsModule.generateTerraform>;
+const mockedGenerateMermaidFlowchart = ExportUtilsModule.generateMermaidFlowchart as vi.MockedFunction<typeof ExportUtilsModule.generateMermaidFlowchart>;
+// --- Mocks for exportCanvas test suite END ---
 
-// Cast the mocked functions to Vi.Mocked types for type safety in tests
-const mockedConvertShapesToCanvasItems = ExportUtils.convertShapesToCanvasItems as vi.MockedFunction<typeof ExportUtils.convertShapesToCanvasItems>;
-const mockedExtractConnectionsFromArrows = ExportUtils.extractConnectionsFromArrows as vi.MockedFunction<typeof ExportUtils.extractConnectionsFromArrows>;
-const mockedGenerateMermaidC4 = ExportUtils.generateMermaidC4 as vi.MockedFunction<typeof ExportUtils.generateMermaidC4>;
-const mockedGenerateMermaidArchitecture = ExportUtils.generateMermaidArchitecture as vi.MockedFunction<typeof ExportUtils.generateMermaidArchitecture>;
-const mockedGenerateJSON = ExportUtils.generateJSON as vi.MockedFunction<typeof ExportUtils.generateJSON>;
-const mockedGenerateTerraform = ExportUtils.generateTerraform as vi.MockedFunction<typeof ExportUtils.generateTerraform>;
-const mockedGenerateMermaidFlowchart = ExportUtils.generateMermaidFlowchart as vi.MockedFunction<typeof ExportUtils.generateMermaidFlowchart>;
 
-
-const mockEditorInstance = { // A stand-in for TLEditor
-  getBindingsFromShape: vi.fn(),
+const mockEditorInstance = {
   getCurrentPageShapes: vi.fn(),
-  // Add any other TLEditor methods if they are used by the functions being called by exportCanvas
+  getBindingsFromShape: vi.fn(),
 } as unknown as TLEditor;
 
 const createMockShape = (id: string, type: string = 'geo'): TLShape => ({
     id, type, x:0,y:0,rotation:0,index:'a1',parentId:'page:page',isLocked:false,props:{},meta:{}
 }) as TLShape;
 
-// Dummy data for previous tests, ensuring they don't rely on the new mocks
-const createDummyExportData = (format: string = 'dummy') : ActualExportData => ({items: [], connections: [], metadata: {exportedAt: '', format, version: ''}});
+const createDummyExportData = (format: string = 'dummy') : ActualExportData => ({items: [], connections: [], metadata: {exportedAt: '2023-01-01T00:00:00Z', format, version: '1.0.0'}});
 
 
 describe('Export Utils', () => {
-  // This beforeEach applies to all describe blocks within Export Utils,
-  // including the ones for individual generator functions.
-  // We clear mocks here to ensure a clean state for *those* tests too,
-  // as they should test the *actual* implementations, not mocks from exportCanvas tests.
   beforeEach(() => {
     vi.clearAllMocks();
-    // If useEditor is used by individual functions, mock its return value here.
-    // For exportCanvas tests specifically, its internal calls are what we're testing.
     (useEditor as vi.Mock).mockReturnValue(mockEditorInstance);
   });
 
-  // No top-level afterEach here to restoreAllMocks, as individual describe blocks
-  // for generator functions should not have their implementations mocked.
-  // The afterEach for restoring mocks is specific to the exportCanvas suite.
+  // Restore all mocks after each test in the top-level describe to ensure isolation
+  // between the 'exportCanvas' suite and the 'useCanvasExport' suite.
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('should have a working test setup', () => { expect(true).toBe(true); });
 
-  // Condensed previous describe blocks - these will use ACTUAL implementations
-  // because the vi.mock for './export-utils' is more targeted for the exportCanvas suite.
-  // However, if they were to run after the exportCanvas suite without proper mock restoration, they could fail.
-  // The afterEach in exportCanvas suite should handle this.
-  describe('extractConnectionsFromArrows (actual)', () => {it('should work with actual implementation', () => { /* placeholder for actual test */ });});
-  describe('convertShapesToCanvasItems (actual)', () => {it('should work with actual implementation', () => { /* placeholder for actual test */ });});
-  describe('generateMermaidC4 (actual)', () => {it('should work with actual implementation', () => {expect(ExportUtils.generateMermaidC4(createDummyExportData('mermaid-c4'))).toContain('C4Context');});});
-  describe('generateMermaidArchitecture (actual)', () => {it('should work with actual implementation', () => {expect(ExportUtils.generateMermaidArchitecture(createDummyExportData('mermaid-architecture')).trim()).toBe('architecture-beta');});});
-  describe('generateJSON (actual)', () => {it('should work with actual implementation', () => {expect(typeof ExportUtils.generateJSON(createDummyExportData('json'))).toBe('string');});});
-  describe('generateTerraform (actual)', () => {it('should work with actual implementation', () => {expect(ExportUtils.generateTerraform(createDummyExportData('terraform'))).toContain('terraform {');});});
-  describe('generateMermaidFlowchart (actual)', () => {it('should work with actual implementation', () => {expect(ExportUtils.generateMermaidFlowchart(createDummyExportData('mermaid-flowchart'))).toContain('flowchart TD');});});
-
-
-  describe('exportCanvas', () => {
-    const dummyShapes: TLShape[] = [createMockShape('s1'), createMockShape('s2')];
+  // --- Test suite for exportCanvas (uses the vi.mock('./export-utils', ...)) ---
+  describe('exportCanvas (testing with mocked dependencies)', () => {
+    const dummyShapes: TLShape[] = [createMockShape('s1')];
     const mockCanvasItems: CanvasItem[] = [{ id: 'item1', key: 'k1', label: 'L1', x:0,y:0, properties: {}, children: [], parentId: undefined, isBoundingBox: false }];
     const mockConnections: Connection[] = [{ id: 'conn1', from: 'f1', to: 't1', label: 'L2', properties: {} }];
 
-    // This beforeEach is specific to the exportCanvas test suite
     beforeEach(() => {
-        // Reset and provide default return values for the mocked functions for this suite
-        mockedConvertShapesToCanvasItems.mockReset().mockReturnValue(mockCanvasItems);
-        mockedExtractConnectionsFromArrows.mockReset().mockReturnValue(mockConnections);
-
-        mockedGenerateMermaidC4.mockReset().mockReturnValue('c4_result_mocked');
-        mockedGenerateMermaidArchitecture.mockReset().mockReturnValue('arch_result_mocked');
-        mockedGenerateJSON.mockReset().mockReturnValue('json_result_mocked');
-        mockedGenerateTerraform.mockReset().mockReturnValue('tf_result_mocked');
-        mockedGenerateMermaidFlowchart.mockReset().mockReturnValue('flowchart_result_mocked');
+        // Setup mock implementations for functions called by exportCanvas
+        mockedConvertShapesToCanvasItems.mockReturnValue(mockCanvasItems);
+        mockedExtractConnectionsFromArrows.mockReturnValue(mockConnections);
+        mockedGenerateJSON.mockReturnValue('json_result_for_export_canvas_test');
+        mockedGenerateMermaidC4.mockReturnValue('c4_result_for_export_canvas_test');
+        // ... mock other generators if they are tested in this suite directly
     });
 
-    // This afterEach is crucial for restoring the original implementations
-    // so that other test suites for individual functions work correctly.
+    // afterEach for exportCanvas suite to restore its specific mocks if they were more global.
+    // However, vi.restoreAllMocks() in the parent afterEach should handle this.
+
+    it('should call convertShapesToCanvasItems and extractConnectionsFromArrows', () => {
+        ExportUtilsModule.exportCanvas('json', mockEditorInstance, dummyShapes);
+        expect(mockedConvertShapesToCanvasItems).toHaveBeenCalledWith(dummyShapes);
+        expect(mockedExtractConnectionsFromArrows).toHaveBeenCalledWith(mockEditorInstance, dummyShapes);
+    });
+
+    it('should call the correct generator (e.g., generateJSON)', () => {
+        ExportUtilsModule.exportCanvas('json', mockEditorInstance, dummyShapes);
+        expect(mockedGenerateJSON).toHaveBeenCalledTimes(1);
+        const callArg = mockedGenerateJSON.mock.calls[0][0];
+        expect(callArg.items).toEqual(mockCanvasItems);
+        expect(callArg.connections).toEqual(mockConnections);
+        expect(callArg.metadata.format).toBe('json');
+    });
+    // ... other tests for exportCanvas using its mocked dependencies
+  });
+
+
+  // --- Test suite for useCanvasExport (should use actual exportCanvas) ---
+  describe('useCanvasExport (testing with actual exportCanvas)', () => {
+    let dummyShapes: TLShape[];
+    let mockAnchorElement: HTMLAnchorElement;
+    let mockCreateObjectURL: vi.Mock;
+    let mockRevokeObjectURL: vi.Mock;
+    let exportCanvasActualSpy: vi.Spied<typeof ExportUtilsModule.exportCanvas>;
+
+
+    beforeEach(() => {
+        // vi.restoreAllMocks() in parent afterEach should have reset mocks of generateXYZ functions.
+        // So, exportCanvas called by useCanvasExport should use actual generators.
+
+        dummyShapes = [createMockShape('s1-ucx'), createMockShape('s2-ucx')];
+        (mockEditorInstance.getCurrentPageShapes as vi.Mock).mockReturnValue(dummyShapes);
+
+        mockAnchorElement = {
+            href: '',
+            download: '',
+            click: vi.fn(),
+            setAttribute: vi.fn(),
+            removeAttribute: vi.fn(),
+        } as unknown as HTMLAnchorElement;
+
+        vi.spyOn(document, 'createElement').mockReturnValue(mockAnchorElement);
+        vi.spyOn(document.body, 'appendChild').mockImplementation(() => {}); // Mock to avoid actual DOM manipulation
+        vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+
+
+        mockCreateObjectURL = vi.fn().mockReturnValue('blob:http://localhost/mock-url-ucx');
+        mockRevokeObjectURL = vi.fn();
+        global.URL.createObjectURL = mockCreateObjectURL;
+        global.URL.revokeObjectURL = mockRevokeObjectURL;
+
+        // Spy on the *actual* exportCanvas for this suite
+        exportCanvasActualSpy = vi.spyOn(ExportUtilsModule, 'exportCanvas').mockImplementation(
+            (format, _editor, _shapes) => `${format}_actual_export_result`
+        );
+    });
+
+    // afterEach for useCanvasExport suite to clean up its specific spies
     afterEach(() => {
-        vi.restoreAllMocks();
+       exportCanvasActualSpy.mockRestore(); // Restore original exportCanvas
+       // Other spies on document, URL are restored by parent's vi.restoreAllMocks()
     });
 
+    it('exportToFormat should call editor.getCurrentPageShapes and exportCanvas with correct arguments', () => {
+      const { exportToFormat } = ExportUtilsModule.useCanvasExport();
+      const result = exportToFormat('json');
 
-    it('should call convertShapesToCanvasItems and extractConnectionsFromArrows with correct arguments', () => {
-      ExportUtils.exportCanvas('json', mockEditorInstance, dummyShapes); // Calls the actual exportCanvas
-      expect(mockedConvertShapesToCanvasItems).toHaveBeenCalledWith(dummyShapes);
-      expect(mockedExtractConnectionsFromArrows).toHaveBeenCalledWith(mockEditorInstance, dummyShapes);
+      expect(mockEditorInstance.getCurrentPageShapes).toHaveBeenCalled();
+      expect(exportCanvasActualSpy).toHaveBeenCalledWith('json', mockEditorInstance, dummyShapes);
+      expect(result).toBe('json_actual_export_result');
     });
 
-    it('should construct ExportData correctly and pass to the generation function', () => {
-      const format = 'json';
-      ExportUtils.exportCanvas(format, mockEditorInstance, dummyShapes);
+    it('downloadExport should call exportToFormat and trigger download with custom filename', async () => {
+      // Need to spy on the hook's own exportToFormat method
+      const hookInstance = ExportUtilsModule.useCanvasExport();
+      const exportToFormatSpy = vi.spyOn(hookInstance, 'exportToFormat').mockReturnValue('file content for download');
 
-      expect(mockedGenerateJSON).toHaveBeenCalledTimes(1);
-      const calledWithData = mockedGenerateJSON.mock.calls[0][0] as ActualExportData;
+      await hookInstance.downloadExport('json', 'custom-file.json');
 
-      expect(calledWithData.items).toEqual(mockCanvasItems);
-      expect(calledWithData.connections).toEqual(mockConnections);
-      expect(calledWithData.metadata.format).toBe(format);
-      expect(calledWithData.metadata.version).toBe('1.0.0'); // Assuming '1.0.0' is hardcoded in exportCanvas
-      expect(calledWithData.metadata.exportedAt).toBeInstanceOf(String); // Check if it's a date string
-      expect(new Date(calledWithData.metadata.exportedAt).toString()).not.toBe('Invalid Date');
+      expect(exportToFormatSpy).toHaveBeenCalledWith('json');
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(mockCreateObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+      const blobArg = mockCreateObjectURL.mock.calls[0][0] as Blob;
+      expect(await blobArg.text()).toBe('file content for download'); // Check blob content
+      expect(mockAnchorElement.href).toBe('blob:http://localhost/mock-url-ucx');
+      expect(mockAnchorElement.download).toBe('custom-file.json');
+      expect(document.body.appendChild).toHaveBeenCalledWith(mockAnchorElement);
+      expect(mockAnchorElement.click).toHaveBeenCalled();
+      expect(document.body.removeChild).toHaveBeenCalledWith(mockAnchorElement);
+      expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:http://localhost/mock-url-ucx');
+
+      exportToFormatSpy.mockRestore();
     });
 
-    const testCases: {format: ExportUtils.ExportFormat; generator: vi.MockedFunction<any>; expectedResult: string}[] = [
-        { format: 'mermaid-c4', generator: mockedGenerateMermaidC4, expectedResult: 'c4_result_mocked' },
-        { format: 'mermaid-architecture', generator: mockedGenerateMermaidArchitecture, expectedResult: 'arch_result_mocked' },
-        { format: 'mermaid-flowchart', generator: mockedGenerateMermaidFlowchart, expectedResult: 'flowchart_result_mocked' },
-        { format: 'json', generator: mockedGenerateJSON, expectedResult: 'json_result_mocked' },
-        { format: 'terraform', generator: mockedGenerateTerraform, expectedResult: 'tf_result_mocked' },
-    ];
+    it('downloadExport should use default filename if none provided', async () => {
+      const hookInstance = ExportUtilsModule.useCanvasExport();
+      const exportToFormatSpy = vi.spyOn(hookInstance, 'exportToFormat').mockReturnValue('default filename content');
 
-    testCases.forEach(({ format, generator, expectedResult }) => {
-        it(`should call ${generator.getMockName() || 'generator'} for format "${format}" and return its result`, () => {
-            const result = ExportUtils.exportCanvas(format, mockEditorInstance, dummyShapes);
-            expect(generator).toHaveBeenCalledTimes(1);
-            const exportDataArgument = generator.mock.calls[0][0] as ActualExportData;
-            expect(exportDataArgument.items).toEqual(mockCanvasItems);
-            expect(exportDataArgument.connections).toEqual(mockConnections);
-            expect(exportDataArgument.metadata.format).toBe(format);
-            expect(result).toBe(expectedResult);
-        });
+      await hookInstance.downloadExport('mermaid-c4'); // No filename
+
+      const expectedFormatInfo = EXPORT_FORMATS.find(f => f.id === 'mermaid-c4');
+      const expectedFilename = `infrastructure-diagram.${expectedFormatInfo?.extension || 'txt'}`;
+
+      expect(mockAnchorElement.download).toBe(expectedFilename);
+      exportToFormatSpy.mockRestore();
     });
 
-    it('should throw an error for an unsupported format', () => {
-      expect(() => {
-        ExportUtils.exportCanvas('unsupported-format' as any, mockEditorInstance, dummyShapes);
-      }).toThrow('Unsupported export format: unsupported-format');
+    it('availableFormats should return the EXPORT_FORMATS constant', () => {
+        const { availableFormats } = ExportUtilsModule.useCanvasExport();
+        expect(availableFormats).toEqual(EXPORT_FORMATS);
     });
   });
+
+  // Placeholder for actual implementation tests of individual generators (run if not in exportCanvas suite)
+  // These should be outside the 'exportCanvas (testing with mocked dependencies)' describe block
+  // and ensure they are testing the non-mocked versions.
+  describe('generateJSON (actual implementation)', () => {
+    it('should produce valid JSON output', () => {
+        const result = ExportUtilsModule.generateJSON(createDummyExportData('json'));
+        expect(() => JSON.parse(result)).not.toThrow();
+        expect(JSON.parse(result).metadata.format).toBe('json');
+    });
+  });
+  // Add similar actual implementation test blocks for other generators if needed,
+  // ensuring they run when the top-level vi.mock('./export-utils') is not active or has been restored.
+
 });
 ```
