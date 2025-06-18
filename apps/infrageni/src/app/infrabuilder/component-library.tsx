@@ -33,22 +33,20 @@ export function ComponentLibrary({
     const sortedRegular = [
         ...regularComponents.filter((c) => favorites.includes(c.id)),
         ...regularComponents.filter((c) => !favorites.includes(c.id)),
-    ];    const renderComponent = (comp: GenericComponent) => (
+    ]; const renderComponent = (comp: GenericComponent) => (
         <div
             key={comp.id}
             draggable
             onDragStart={e => {
                 e.dataTransfer.setData('application/x-infrageni-component', comp.id);
             }}
-            className={`cursor-move px-3 py-2 rounded-lg glass-button glass-button-hover transition-all duration-200 flex items-center justify-between ${
-                favorites.includes(comp.id) 
-                    ? 'border-2 border-yellow-400/60 bg-yellow-50/40 dark:bg-yellow-900/20' 
+            className={`cursor-move px-3 py-2 rounded-lg glass-button glass-button-hover transition-all duration-200 flex items-center justify-between ${favorites.includes(comp.id)
+                ? 'border-2 border-yellow-400/60 bg-yellow-50/40 dark:bg-yellow-900/20'
+                : ''
+                } ${comp.isBoundingBox
+                    ? 'border-2 border-dashed border-blue-400/60 bg-blue-50/40 dark:bg-blue-900/20'
                     : ''
-            } ${
-                comp.isBoundingBox 
-                    ? 'border-2 border-dashed border-blue-400/60 bg-blue-50/40 dark:bg-blue-900/20' 
-                    : ''
-            }`}
+                }`}
         >
             <span className={`${comp.isBoundingBox ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-black/80 dark:text-white/80'} text-sm`}>
                 {comp.providerNames[provider] || comp.label}
@@ -69,7 +67,7 @@ export function ComponentLibrary({
                 {favorites.includes(comp.id) ? '★' : '☆'}
             </button>
         </div>
-    );    return (
+    ); return (
         <aside className="w-64 glass-panel border border-white/20 dark:border-white/10 rounded-lg p-4 shrink-0 flex flex-col shadow-lg">
             <h2 className="text-lg font-semibold mb-3 text-black/90 dark:text-white/90">Component Library</h2>
             <input

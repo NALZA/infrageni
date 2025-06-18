@@ -39,35 +39,35 @@ export function ProviderSelector() {
                     className="fixed inset-0 z-[99999]"
                     onClick={() => setIsOpen(false)}
                 />                {/* Dropdown */}
-                <div 
+                <div
                     className="fixed w-[140px] bg-white/40 dark:bg-gray-900/40 backdrop-blur-md rounded-lg py-1 border border-white/30 dark:border-white/20 z-[100000] shadow-xl"
                     style={{
                         top: dropdownPosition.top,
                         right: dropdownPosition.right,
                     }}
                 >{PROVIDER_OPTIONS.map((option) => (
-                        <button
-                            key={option.value}
-                            onClick={() => {
-                                setProvider(option.value as Provider);
-                                setIsOpen(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 hover:bg-white/10 dark:hover:bg-white/5 first:rounded-t-lg last:rounded-b-lg ${option.value === provider
-                                ? 'bg-primary/20 text-primary dark:bg-primary/30'
-                                : 'text-black/80 dark:text-white/80'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <Cloud className="h-4 w-4" />
-                                {option.label}
-                            </div>
-                        </button>
-                    ))}
+                    <button
+                        key={option.value}
+                        onClick={() => {
+                            setProvider(option.value as Provider);
+                            setIsOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm transition-all duration-200 hover:bg-white/10 dark:hover:bg-white/5 first:rounded-t-lg last:rounded-b-lg ${option.value === provider
+                            ? 'bg-primary/20 text-primary dark:bg-primary/30'
+                            : 'text-black/80 dark:text-white/80'
+                            }`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Cloud className="h-4 w-4" />
+                            {option.label}
+                        </div>
+                    </button>
+                ))}
                 </div>
             </>,
             document.body
         );
-    };    return (
+    }; return (
         <>
             <div className="relative z-[50000]">
                 <button
