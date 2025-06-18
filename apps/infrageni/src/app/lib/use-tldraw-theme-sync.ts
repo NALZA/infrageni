@@ -14,7 +14,7 @@ export function useTldrawThemeSync() {
     if (editor) {
       // Update tldraw's user preferences to match our theme
       editor.user.updateUserPreferences({
-        colorScheme: isDark ? 'dark' : 'light'
+        colorScheme: isDark ? 'dark' : 'light',
       });
     }
   }, [editor, isDark]);
