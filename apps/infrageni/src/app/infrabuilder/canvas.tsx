@@ -154,10 +154,10 @@ function ContainerMovementHandler() {
 function DropZone() {
     const editor = useEditor();
     const provider = useProvider();
-    
+
     // Sync tldraw theme with our application theme
     useTldrawThemeSync();
-    
+
     // Toolbar state
     const [connectMode, setConnectMode] = React.useState(false);
     const [labelMode, setLabelMode] = React.useState(false);
@@ -259,7 +259,7 @@ function DropZone() {
 
 export function Canvas() {
     return (
-        <main className="flex-1 glass-panel border rounded-lg relative min-h-[400px] overflow-hidden">
+        <main className="flex-1 glass-panel rounded-lg relative min-h-[400px] overflow-hidden">
             <Tldraw
                 className="w-full h-full"
                 shapeUtils={customShapeUtils}
