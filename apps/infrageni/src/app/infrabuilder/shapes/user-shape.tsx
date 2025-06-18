@@ -11,6 +11,8 @@ export class UserShapeUtil extends BaseInfraShapeUtil<UserShape> {
         color: T.string,
         label: T.string,
         componentId: T.string,
+        isBoundingBox: T.optional(T.boolean),
+        opacity: T.optional(T.number),
     };
 
     override getDefaultProps(): UserShape['props'] {
@@ -20,14 +22,15 @@ export class UserShapeUtil extends BaseInfraShapeUtil<UserShape> {
             color: 'violet',
             label: 'User',
             componentId: 'user',
+            isBoundingBox: false,
         };
     }
 
     getIcon() {
         return (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" strokeWidth="2"/>
-                <circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="currentColor" strokeWidth="2" />
+                <circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
             </svg>
         );
     }

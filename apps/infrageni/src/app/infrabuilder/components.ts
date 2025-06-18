@@ -5,9 +5,43 @@ export type GenericComponent = {
   id: string;
   label: string;
   providerNames: Record<string, string>;
+  isBoundingBox?: boolean; // New property to indicate if this is a container component
 };
 
 export const GENERIC_COMPONENTS: GenericComponent[] = [
+  {
+    id: 'vpc',
+    label: 'Virtual Private Cloud',
+    isBoundingBox: true,
+    providerNames: {
+      aws: 'VPC',
+      azure: 'Virtual Network',
+      gcp: 'VPC Network',
+      generic: 'Virtual Private Cloud',
+    },
+  },
+  {
+    id: 'subnet',
+    label: 'Subnet',
+    isBoundingBox: true,
+    providerNames: {
+      aws: 'Subnet',
+      azure: 'Subnet',
+      gcp: 'Subnetwork',
+      generic: 'Subnet',
+    },
+  },
+  {
+    id: 'availability-zone',
+    label: 'Availability Zone',
+    isBoundingBox: true,
+    providerNames: {
+      aws: 'Availability Zone',
+      azure: 'Availability Zone',
+      gcp: 'Zone',
+      generic: 'Availability Zone',
+    },
+  },
   {
     id: 'compute',
     label: 'Compute Instance',

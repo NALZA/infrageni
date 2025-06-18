@@ -4,10 +4,14 @@ export type CanvasItem = {
   x: number;
   y: number;
   key: string;
+  parentId?: string; // ID of the container this item belongs to
+  isBoundingBox?: boolean; // Whether this item can contain other items
+  children?: string[]; // IDs of contained items (for bounding box types)
   properties?: {
     instanceType?: string;
     region?: string;
     engine?: string;
+    cidrBlock?: string; // For VPC/subnet CIDR blocks
     // Add more fields as needed for other component types
   };
 };
