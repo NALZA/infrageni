@@ -1,4 +1,4 @@
-import { createShapeId } from 'tldraw';
+import { createShapeId, TLShapeId } from 'tldraw';
 import { GenericComponent } from '../components';
 
 // Import all shape utils for the customShapeUtils array
@@ -52,7 +52,8 @@ export function createComponentShape(
   component: GenericComponent,
   x: number,
   y: number,
-  provider: string
+  provider: string,
+  parentId?: TLShapeId
 ) {
   const shapeId = createShapeId();
   const label = component.providerNames[provider] || component.label;
@@ -61,6 +62,7 @@ export function createComponentShape(
     id: shapeId,
     x,
     y,
+    parentId,
     props: {
       w: component.isBoundingBox ? 300 : 120, // Larger default size for bounding boxes
       h: component.isBoundingBox ? 200 : 80,

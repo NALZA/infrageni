@@ -4,5 +4,8 @@
   "private": true,
   "nx": {
     "name": "infrageni"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0"
   }
 }
