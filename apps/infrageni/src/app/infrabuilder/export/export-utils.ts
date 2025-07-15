@@ -1,4 +1,4 @@
-import { TLShape, useEditor, TLArrowBinding } from 'tldraw';
+import { TLShape, useEditor, TLArrowBinding, TLArrowShape, TLBinding } from 'tldraw';
 import { BaseInfraShapeProps } from '../shapes/base';
 import { CanvasItem, Connection } from '../types';
 import { EXPORT_FORMATS } from './formats';
@@ -24,19 +24,25 @@ export function extractConnectionsFromArrows(
     if (shape.type === 'arrow') {
       console.log('� Processing arrow shape:', shape.id);
 
-      // Use TLDraw v2 API to get arrow bindings
-      const bindings = editor.getBindingsFromShape(shape.id, 'arrow');
+      // Use TLDraw v3 API to get arrow bindings
+      const bindings = editor.getBindingsToShape(shape, 'arrow');
 
       // Find start and end bindings
-      const startBinding = bindings.find(
-        (b) => (b as TLArrowBinding).props.terminal === 'start'
-      ) as TLArrowBinding;
-      const endBinding = bindings.find(
-        (b) => (b as TLArrowBinding).props.terminal === 'end'
-      ) as TLArrowBinding;
+      let startBinding: TLArrowBinding | undefined;
+      let endBinding: TLArrowBinding | undefined;
+
+      for (const binding of bindings) {
+        const arrowBinding = binding as TLArrowBinding;
+        if (arrowBinding.props.terminal === 'start') {
+          startBinding = arrowBinding;
+        } else if (arrowBinding.props.terminal === 'end') {
+          endBinding = arrowBinding;
+        }
+      }
 
       if (startBinding && endBinding) {
-        const arrowProps = shape.props as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+        const arrowShape = shape as TLArrowShape;
+        const arrowProps = arrowShape.props;
 
         const connection: Connection = {
           id: shape.id,
@@ -66,7 +72,12 @@ export function convertShapesToCanvasItems(shapes: TLShape[]): CanvasItem[] {
     // Skip arrow shapes as they are handled separately as connections
     if (shape.type === 'arrow') continue;
 
-    const props = shape.props as BaseInfraShapeProps;
+    // Type guard to check if shape has BaseInfraShapeProps
+    const hasInfraProps = (shape: TLShape): shape is TLShape & { props: BaseInfraShapeProps } => {
+      return 'label' in (shape.props as any);
+    };
+
+    const props = hasInfraProps(shape) ? shape.props : null;
     if (!props) continue;
 
     // Determine the component type based on shape type
@@ -79,9 +90,14 @@ export function convertShapesToCanvasItems(shapes: TLShape[]): CanvasItem[] {
       key: `${componentType}-${shape.id}`,
       isBoundingBox: props.isBoundingBox,
       properties: {
-        // Extract any custom properties from the shape's props
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(props as any), // Cast to any to access potential custom properties
+        // Extract custom properties with proper typing
+        w: props.w,
+        h: props.h,
+        label: props.label,
+        color: props.color,
+        isBoundingBox: props.isBoundingBox,
+        componentId: props.componentId,
+        ...(props as Record<string, unknown>), // Safer casting for additional properties
       },
     };
 
@@ -550,6 +566,147 @@ export function generateMermaidFlowchart(data: ExportData): string {
   return mermaid;
 }
 
+// Generate SVG export
+export function generateSVG(data: ExportData): string {
+  const { items, connections } = data;
+
+  // Calculate canvas bounds
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const item of items) {
+    const w = item.properties?.w || 120;
+    const h = item.properties?.h || 80;
+    
+    minX = Math.min(minX, item.x);
+    minY = Math.min(minY, item.y);
+    maxX = Math.max(maxX, item.x + w);
+    maxY = Math.max(maxY, item.y + h);
+  }
+
+  const padding = 50;
+  const canvasWidth = maxX - minX + 2 * padding;
+  const canvasHeight = maxY - minY + 2 * padding;
+
+  let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${canvasWidth}" height="${canvasHeight}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .shape-text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+      .compute-shape { fill: #3b82f6; stroke: #1e40af; stroke-width: 2; }
+      .database-shape { fill: #10b981; stroke: #047857; stroke-width: 2; }
+      .storage-shape { fill: #f59e0b; stroke: #d97706; stroke-width: 2; }
+      .vpc-shape { fill: #3b82f6; fill-opacity: 0.1; stroke: #1e40af; stroke-width: 2; stroke-dasharray: 5,5; }
+      .subnet-shape { fill: #10b981; fill-opacity: 0.2; stroke: #047857; stroke-width: 2; stroke-dasharray: 5,5; }
+      .az-shape { fill: #8b5cf6; fill-opacity: 0.15; stroke: #7c3aed; stroke-width: 2; stroke-dasharray: 5,5; }
+      .external-shape { fill: #ef4444; stroke: #dc2626; stroke-width: 2; }
+      .user-shape { fill: #8b5cf6; stroke: #7c3aed; stroke-width: 2; }
+      .connection-line { stroke: #6b7280; stroke-width: 2; marker-end: url(#arrowhead); }
+      .connection-label { font-family: Arial, sans-serif; font-size: 10px; text-anchor: middle; fill: #374151; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+    </marker>
+  </defs>
+
+`;
+
+  // Helper function to get shape class
+  const getShapeClass = (item: CanvasItem): string => {
+    const type = item.key.split('-')[0];
+    switch (type) {
+      case 'compute': return 'compute-shape';
+      case 'database': return 'database-shape';
+      case 'storage': return 'storage-shape';
+      case 'vpc': return 'vpc-shape';
+      case 'subnet': return 'subnet-shape';
+      case 'availability-zone': return 'az-shape';
+      case 'external-system': return 'external-shape';
+      case 'user': return 'user-shape';
+      default: return 'compute-shape';
+    }
+  };
+
+  // Render bounding box shapes first (behind other shapes)
+  const boundingBoxes = items.filter(item => item.isBoundingBox);
+  const regularShapes = items.filter(item => !item.isBoundingBox);
+
+  // Draw bounding boxes
+  for (const item of boundingBoxes) {
+    const x = item.x - minX + padding;
+    const y = item.y - minY + padding;
+    const w = item.properties?.w || 300;
+    const h = item.properties?.h || 200;
+    const shapeClass = getShapeClass(item);
+
+    svg += `  <rect x="${x}" y="${y}" width="${w}" height="${h}" class="${shapeClass}" />\n`;
+    svg += `  <text x="${x + w/2}" y="${y + 20}" class="shape-text">${item.label}</text>\n`;
+  }
+
+  // Draw connections
+  for (const connection of connections) {
+    const fromItem = items.find(item => item.id === connection.from);
+    const toItem = items.find(item => item.id === connection.to);
+    
+    if (fromItem && toItem) {
+      const fromW = fromItem.properties?.w || 120;
+      const fromH = fromItem.properties?.h || 80;
+      const toW = toItem.properties?.w || 120;
+      const toH = toItem.properties?.h || 80;
+      
+      const fromX = fromItem.x - minX + padding + fromW / 2;
+      const fromY = fromItem.y - minY + padding + fromH / 2;
+      const toX = toItem.x - minX + padding + toW / 2;
+      const toY = toItem.y - minY + padding + toH / 2;
+
+      svg += `  <line x1="${fromX}" y1="${fromY}" x2="${toX}" y2="${toY}" class="connection-line" />\n`;
+      
+      if (connection.label) {
+        const midX = (fromX + toX) / 2;
+        const midY = (fromY + toY) / 2;
+        svg += `  <text x="${midX}" y="${midY - 5}" class="connection-label">${connection.label}</text>\n`;
+      }
+    }
+  }
+
+  // Draw regular shapes
+  for (const item of regularShapes) {
+    const x = item.x - minX + padding;
+    const y = item.y - minY + padding;
+    const w = item.properties?.w || 120;
+    const h = item.properties?.h || 80;
+    const shapeClass = getShapeClass(item);
+
+    const type = item.key.split('-')[0];
+    
+    if (type === 'user') {
+      // Draw user as a circle
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const r = Math.min(w, h) / 2;
+      svg += `  <circle cx="${cx}" cy="${cy}" r="${r}" class="${shapeClass}" />\n`;
+    } else if (type === 'database') {
+      // Draw database as a cylinder
+      const rx = w / 2;
+      const ry = h / 8;
+      svg += `  <ellipse cx="${x + w/2}" cy="${y + ry}" rx="${rx}" ry="${ry}" class="${shapeClass}" />\n`;
+      svg += `  <rect x="${x}" y="${y + ry}" width="${w}" height="${h - 2*ry}" class="${shapeClass}" />\n`;
+      svg += `  <ellipse cx="${x + w/2}" cy="${y + h - ry}" rx="${rx}" ry="${ry}" class="${shapeClass}" />\n`;
+    } else {
+      // Draw as rectangle
+      svg += `  <rect x="${x}" y="${y}" width="${w}" height="${h}" class="${shapeClass}" />\n`;
+    }
+    
+    svg += `  <text x="${x + w/2}" y="${y + h/2}" class="shape-text">${item.label}</text>\n`;
+  }
+
+  svg += `</svg>`;
+
+  return svg;
+}
+
 // Main export function
 export function exportCanvas(
   format: string,
@@ -576,6 +733,8 @@ export function exportCanvas(
       return generateMermaidArchitecture(data);
     case 'mermaid-flowchart':
       return generateMermaidFlowchart(data);
+    case 'svg':
+      return generateSVG(data);
     case 'json':
       return generateJSON(data);
     case 'terraform':

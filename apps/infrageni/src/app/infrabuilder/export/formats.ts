@@ -25,6 +25,12 @@ export const EXPORT_FORMATS: ExportFormat[] = [
     description: 'Simple Mermaid flowchart diagram',
   },
   {
+    id: 'svg',
+    name: 'SVG',
+    extension: 'svg',
+    description: 'Scalable Vector Graphics export',
+  },
+  {
     id: 'json',
     name: 'JSON',
     extension: 'json',

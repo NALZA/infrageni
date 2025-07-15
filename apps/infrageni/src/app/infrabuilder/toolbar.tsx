@@ -7,8 +7,9 @@ export interface ToolbarProps {
     setLabelMode: (v: boolean) => void;
     onExport?: () => void;
     onShowConnectionGuide?: () => void;
-    // boxMode?: boolean;
-    // setBoxMode?: (v: boolean) => void;
+    onShare?: () => void;
+    onLibrary?: () => void;
+    onAnimation?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -17,7 +18,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     labelMode,
     setLabelMode,
     onExport,
-    onShowConnectionGuide
+    onShowConnectionGuide,
+    onShare,
+    onLibrary,
+    onAnimation
 }) => {
     const toolbarButton = (active: boolean, onClick: () => void, label: string) => (
         <button
@@ -57,8 +61,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Right section - Additional tools */}
             <div className="flex items-center gap-2">
-                {/* Future toolbar items can go here */}
-                {/* {toolbarButton(boxMode, () => setBoxMode && setBoxMode(!boxMode), 'Box')} */}
+                {onLibrary && actionButton(onLibrary, 'Library', 'secondary')}
+                {onAnimation && actionButton(onAnimation, 'Animation', 'secondary')}
+                {onShare && actionButton(onShare, 'Share', 'secondary')}
             </div>
         </div>
     );

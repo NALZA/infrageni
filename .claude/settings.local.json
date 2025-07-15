@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(nx test:*)",
+      "Bash(npm test)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm run test:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm exec nx run:*)",
+      "Bash(pnpm exec nx test:*)",
+      "Bash(npx nx test:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
+    ],
+    "deny": []
+  }
+}
