@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useEditor } from 'tldraw';
 import { 
@@ -15,7 +15,7 @@ import { AnimationSequence } from './animation-types';
 
 export function AnimationControls() {
   const editor = useEditor();
-  const [animationState, setAnimationState] = useAtom(animationStateAtom);
+  const [animationState] = useAtom(animationStateAtom);
   const [currentSequence] = useAtom(currentSequenceAtom);
   const [, setIsPlaying] = useAtom(setPlaybackStateAtom);
   const [, setCurrentTime] = useAtom(setCurrentTimeAtom);

@@ -8,7 +8,7 @@ import {
     Rectangle2d,
 } from 'tldraw';
 import { GenericComponent } from './components';
-import { useProvider } from './components';
+// import { useProvider } from './components'; // Unused for now
 
 // Define the shape types for each component
 export type ComputeShape = TLBaseShape<

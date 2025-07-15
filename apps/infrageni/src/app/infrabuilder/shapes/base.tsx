@@ -14,6 +14,8 @@ export interface BaseInfraShapeProps {
     color: string;
     label: string;
     componentId: string;
+    isBoundingBox?: boolean;
+    opacity?: number;
 }
 
 // Helper function to get provider-specific label
@@ -97,7 +99,6 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
             >
                 <ShapeContent 
                     componentId={shape.props.componentId} 
-                    icon={icon} 
                     color={shape.props.color} 
                 />
             </HTMLContainer>

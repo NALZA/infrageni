@@ -1,4 +1,4 @@
-import { TLShape, useEditor, TLArrowBinding, TLArrowShape, TLBinding } from 'tldraw';
+import { TLShape, useEditor, TLArrowBinding, TLArrowShape } from 'tldraw';
 import { BaseInfraShapeProps } from '../shapes/base';
 import { CanvasItem, Connection } from '../types';
 import { EXPORT_FORMATS } from './formats';
@@ -88,21 +88,21 @@ export function convertShapesToCanvasItems(shapes: TLShape[]): CanvasItem[] {
       x: shape.x,
       y: shape.y,
       key: `${componentType}-${shape.id}`,
-      isBoundingBox: props.isBoundingBox,
+      isBoundingBox: props.isBoundingBox || false,
       properties: {
         // Extract custom properties with proper typing
         w: props.w,
         h: props.h,
         label: props.label,
         color: props.color,
-        isBoundingBox: props.isBoundingBox,
+        isBoundingBox: props.isBoundingBox || false,
         componentId: props.componentId,
         ...(props as Record<string, unknown>), // Safer casting for additional properties
       },
     };
 
     // For bounding boxes, find their children
-    if (props.isBoundingBox) {
+    if (props.isBoundingBox || false) {
       const children: string[] = [];
       const containerBounds = {
         x: shape.x,
@@ -115,7 +115,7 @@ export function convertShapesToCanvasItems(shapes: TLShape[]): CanvasItem[] {
         if (otherShape.id === shape.id) continue;
 
         const otherProps = otherShape.props as BaseInfraShapeProps;
-        if (otherProps?.isBoundingBox) continue; // Skip other containers
+        if (otherProps?.isBoundingBox || false) continue; // Skip other containers
 
         // Check if the other shape is contained within this bounding box
         const otherCenterX = otherShape.x + (otherProps?.w || 0) / 2;
@@ -136,13 +136,13 @@ export function convertShapesToCanvasItems(shapes: TLShape[]): CanvasItem[] {
     }
 
     // For non-bounding boxes, find their parent
-    if (!props.isBoundingBox) {
+    if (!(props.isBoundingBox || false)) {
       const shapeCenterX = shape.x + (props.w || 0) / 2;
       const shapeCenterY = shape.y + (props.h || 0) / 2;
 
       for (const containerShape of shapes) {
         const containerProps = containerShape.props as BaseInfraShapeProps;
-        if (!containerProps?.isBoundingBox || containerShape.id === shape.id)
+        if (!(containerProps?.isBoundingBox || false) || containerShape.id === shape.id)
           continue;
 
         const containerBounds = {

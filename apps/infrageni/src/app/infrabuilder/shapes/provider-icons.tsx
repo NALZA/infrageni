@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FC } from 'react';
 
 // Provider-specific icons for different services
 export interface ProviderIconProps {

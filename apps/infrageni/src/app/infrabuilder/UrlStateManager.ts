@@ -30,7 +30,7 @@ export function useUrlCanvasState(
 ) {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Unused for now
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const lastSerializedRef = useRef<string | null>(null);
 
