@@ -3,7 +3,6 @@ import { GENERIC_COMPONENTS } from './components';
 import { ComponentLibrary } from './component-library';
 import { Canvas } from './canvas';
 import { AnimationControls } from './animation/animation-controls';
-import { DiagramLibrary } from './library/diagram-library';
 import { DiagramTemplate, SavedDiagram } from './library/diagram-types';
 
 const InfraBuilder = () => {
@@ -37,14 +36,12 @@ const InfraBuilder = () => {
                     search={search}
                     setSearch={setSearch}
                 />
-                <Canvas />
+                <Canvas 
+                    showLibrary={showLibrary}
+                    onCloseLibrary={() => setShowLibrary(false)}
+                    onLoadDiagram={handleLoadDiagram}
+                />
             </div>
-
-            <DiagramLibrary
-                isOpen={showLibrary}
-                onClose={() => setShowLibrary(false)}
-                onLoadDiagram={handleLoadDiagram}
-            />
         </div>
     );
 };
