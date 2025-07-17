@@ -6,6 +6,8 @@ import {
 } from 'tldraw';
 import { GENERIC_COMPONENTS, useProvider } from '../components';
 import { getProviderIcon } from './provider-icons';
+import { validateShapeProperties, ValidationResult } from '../validation/shape-validation';
+import { handleShapeUpdateError, handleShapeCreationError } from '../validation/shape-error-handler';
 
 // Base shape type interface
 export interface BaseInfraShapeProps {
@@ -44,6 +46,33 @@ export function ShapeContent({ componentId, color, icon }: { componentId: string
 // Base shape utility class with common functionality
 export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfraShapeProps>> extends BaseBoxShapeUtil<T> {
 
+    // Validate shape properties at runtime
+    protected validateProps(shape: T): ValidationResult {
+        return validateShapeProperties(shape.props);
+    }
+
+    // Hook for shape validation on updates
+    override onBeforeUpdate(prev: T, next: T) {
+        const correctedProps = handleShapeUpdateError(next.type, prev.props, next.props);
+        
+        // Return shape with corrected properties if needed
+        return {
+            ...next,
+            props: correctedProps
+        } as T;
+    }
+
+    // Hook for shape validation on creation
+    override onBeforeCreate(shape: T) {
+        const correctedProps = handleShapeCreationError(shape.type, shape.props);
+        
+        // Return shape with corrected properties if needed
+        return {
+            ...shape,
+            props: correctedProps
+        } as T;
+    }
+
     override getGeometry(shape: T) {
         return new Rectangle2d({
             width: shape.props.w,
@@ -74,6 +103,8 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
 
     override component(shape: T) {
         const icon = this.getIcon();
+        const borderColor = this.getBorderColor();
+        const textColor = this.getTextColor();
 
         return (
             <HTMLContainer
@@ -85,18 +116,22 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'column',
-                    border: `2px solid ${this.getBorderColor()}`,
+                    border: `2px solid ${borderColor}`,
                     borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backgroundColor: shape.props.isBoundingBox 
+                        ? `rgba(255, 255, 255, ${shape.props.opacity || 0.1})`
+                        : 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(10px)',
                     fontSize: '12px',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     padding: '8px',
                     boxSizing: 'border-box',
-                    color: this.getTextColor(),
+                    color: textColor,
+                    pointerEvents: 'all',
                 }}
-            >                <ShapeContent
+            >
+                <ShapeContent
                     componentId={shape.props.componentId}
                     icon={icon}
                     color={shape.props.color}

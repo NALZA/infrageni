@@ -1,5 +1,7 @@
 import { createShapeId, TLShapeId } from 'tldraw';
 import { GenericComponent } from '../components';
+import { validateShape, formatValidationErrors } from '../validation/shape-validation';
+import { handleShapeCreationError } from '../validation/shape-error-handler';
 
 // Import all shape utils for the customShapeUtils array
 import { ComputeShapeUtil } from './compute-shape';
@@ -70,6 +72,22 @@ export function createComponentShape(
       componentId: component.id, // Add the component ID to make shapes reactive
       isBoundingBox: component.isBoundingBox,
     },
+  };
+
+  // Use error handler to validate and correct properties before shape creation
+  const validatedBaseProps = handleShapeCreationError(component.id, {
+    w: baseProps.props.w,
+    h: baseProps.props.h,
+    label,
+    componentId: component.id,
+    color: 'blue', // Default color, will be overridden below
+    isBoundingBox: component.isBoundingBox,
+  });
+
+  // Update baseProps with validated properties
+  baseProps.props = {
+    ...baseProps.props,
+    ...validatedBaseProps
   };
 
   switch (component.id) {

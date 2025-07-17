@@ -8,53 +8,171 @@ import { Toolbar } from './toolbar';
 import { ExportDialog } from './export';
 import { ConnectionGuide } from './connection-guide';
 import { useTldrawThemeSync } from '../lib/use-tldraw-theme-sync';
-import { useUrlStateWithTldraw } from './hooks/useUrlStateWithTldraw';
+import { useInitialUrlLoad } from './hooks/useInitialUrlLoad';
 
-// Helper function to check if a point is inside a bounding box shape
-function isPointInBoundingBox(point: { x: number; y: number }, shape: TLShape): boolean {
-    const { x, y, props } = shape;
-    const shapeProps = props as BaseInfraShapeProps;
-    return point.x >= x &&
-        point.x <= x + shapeProps.w &&
-        point.y >= y &&
-        point.y <= y + shapeProps.h;
+// To test validation functionality, run this in browser console:
+// import { runAllTests } from './validation'; runAllTests();
+
+// Enhanced drag-and-drop system with smooth container transitions
+class DragDropManager {
+    private editor: ReturnType<typeof useEditor>;
+    private lastReparentTime: number = 0;
+    private readonly REPARENT_COOLDOWN = 200; // Minimum time between reparenting operations
+    private readonly HYSTERESIS_MARGIN = 20; // Buffer zone to prevent rapid switching
+    
+    constructor(editor: ReturnType<typeof useEditor>) {
+        this.editor = editor;
+    }
+    
+    // Performance monitoring for debugging
+    private measurePerformance<T>(name: string, fn: () => T): T {
+        const start = performance.now();
+        const result = fn();
+        const duration = performance.now() - start;
+        if (duration > 10) { // Log operations taking more than 10ms
+            console.debug(`DragDropManager.${name} took ${duration.toFixed(2)}ms`);
+        }
+        return result;
+    }
+    
+    // Check if a point is inside a container shape
+    private isPointInContainer(point: { x: number; y: number }, shape: TLShape): boolean {
+        const { x, y, props } = shape;
+        const shapeProps = props as BaseInfraShapeProps;
+        return point.x >= x &&
+            point.x <= x + shapeProps.w &&
+            point.y >= y &&
+            point.y <= y + shapeProps.h;
+    }
+    
+    // Find the most appropriate container for a point with hysteresis
+    public findBestContainer(point: { x: number; y: number }, excludeShapeId?: TLShapeId, currentParentId?: TLShapeId): TLShapeId | null {
+        return this.measurePerformance('findBestContainer', () => {
+            const allShapes = this.editor.getCurrentPageShapes();
+            const containers = allShapes.filter((shape: TLShape) => {
+                const shapeProps = shape.props as BaseInfraShapeProps;
+                return shapeProps?.isBoundingBox &&
+                    shape.id !== excludeShapeId &&
+                    this.isPointInContainer(point, shape);
+            });
+            
+            if (containers.length === 0) return null;
+            
+            // Apply hysteresis: if already in a container, require more distance to switch
+            if (currentParentId) {
+                const currentParent = containers.find(c => c.id === currentParentId);
+                if (currentParent) {
+                    const currentProps = currentParent.props as BaseInfraShapeProps;
+                    // Check if point is still within hysteresis margin of current container
+                    const margin = this.HYSTERESIS_MARGIN;
+                    const withinHysteresis = 
+                        point.x >= currentParent.x - margin &&
+                        point.x <= currentParent.x + currentProps.w + margin &&
+                        point.y >= currentParent.y - margin &&
+                        point.y <= currentParent.y + currentProps.h + margin;
+                    
+                    if (withinHysteresis) {
+                        return currentParentId;
+                    }
+                }
+            }
+            
+            // Return the smallest container (most specific)
+            return containers.reduce((smallest: TLShape, current: TLShape) => {
+                const smallestProps = smallest.props as BaseInfraShapeProps;
+                const currentProps = current.props as BaseInfraShapeProps;
+                const smallestArea = smallestProps.w * smallestProps.h;
+                const currentArea = currentProps.w * currentProps.h;
+                return currentArea < smallestArea ? current : smallest;
+            }).id;
+        });
+    }
+    
+    // Check if a container can hold another container (prevent invalid nesting)
+    private canContainContainer(parentContainer: TLShape, childContainer: TLShape): boolean {
+        const parentProps = parentContainer.props as BaseInfraShapeProps;
+        const childProps = childContainer.props as BaseInfraShapeProps;
+        
+        // Define containment rules based on component types
+        const parentType = parentProps.componentId;
+        const childType = childProps.componentId;
+        
+        // VPC can contain subnets and availability zones
+        if (parentType === 'vpc') {
+            return childType === 'subnet' || childType === 'availability-zone';
+        }
+        
+        // Availability zones can contain subnets
+        if (parentType === 'availability-zone') {
+            return childType === 'subnet';
+        }
+        
+        // Subnets can contain non-container components
+        if (parentType === 'subnet') {
+            return !childProps.isBoundingBox;
+        }
+        
+        return true; // Default: allow containment
+    }
+    
+    // Enhanced reparenting with validation and cooldown
+    public reparentShape(shapeId: TLShapeId, newParentId: TLParentId): boolean {
+        const now = Date.now();
+        
+        // Apply cooldown to prevent rapid reparenting
+        if (now - this.lastReparentTime < this.REPARENT_COOLDOWN) {
+            return false;
+        }
+        
+        const shape = this.editor.getShape(shapeId);
+        const newParent = newParentId !== this.editor.getCurrentPageId() ? this.editor.getShape(newParentId as TLShapeId) : null;
+        
+        if (!shape) return false;
+        
+        // If moving to a container, validate the containment
+        if (newParent) {
+            const shapeProps = shape.props as BaseInfraShapeProps;
+            const parentProps = newParent.props as BaseInfraShapeProps;
+            
+            // Prevent containers from containing themselves or invalid nesting
+            if (shapeProps.isBoundingBox && !this.canContainContainer(newParent, shape)) {
+                return false;
+            }
+        }
+        
+        this.editor.reparentShapes([shapeId], newParentId);
+        this.editor.bringToFront([shapeId]);
+        this.lastReparentTime = now;
+        return true;
+    }
+    
+    // Create a new shape with proper parent assignment
+    public createShapeWithParent(component: any, point: { x: number; y: number }, provider: string): TLShape | null {
+        const parentId = this.findBestContainer(point);
+        const shape = createComponentShape(component, point.x, point.y, provider, parentId);
+        
+        const createdShape = this.editor.createShape(shape);
+        if (createdShape) {
+            this.editor.bringToFront([createdShape.id as TLShapeId]);
+        }
+        return createdShape;
+    }
 }
 
-// Helper function to find the smallest bounding box that contains a point
+// Helper function to maintain backward compatibility
 function findContainingBoundingBox(editor: ReturnType<typeof useEditor>, point: { x: number; y: number }, excludeShapeId?: TLShapeId): TLShapeId | null {
-    const allShapes = editor.getCurrentPageShapes();
-    const boundingBoxShapes = allShapes.filter((shape: TLShape) => {
-        const shapeProps = shape.props as BaseInfraShapeProps;
-        return shapeProps?.isBoundingBox &&
-            shape.id !== excludeShapeId && // Prevent a shape from being its own parent
-            isPointInBoundingBox(point, shape);
-    });
-
-    // Return the smallest bounding box (by area) that contains the point
-    if (boundingBoxShapes.length === 0) return null;
-
-    return boundingBoxShapes.reduce((smallest: TLShape, current: TLShape) => {
-        const smallestProps = smallest.props as BaseInfraShapeProps;
-        const currentProps = current.props as BaseInfraShapeProps;
-        const smallestArea = smallestProps.w * smallestProps.h;
-        const currentArea = currentProps.w * currentProps.h;
-        return currentArea < smallestArea ? current : smallest;
-    }).id;
+    const manager = new DragDropManager(editor);
+    return manager.findBestContainer(point, excludeShapeId);
 }
 
-// A component to handle reparenting logic when shapes are moved
-
-
-// Inner component that has access to the editor
-// A component to handle the URL state synchronization
-function UrlState() {
-    useUrlStateWithTldraw();
-    return null;
-}
+// Enhanced reparenting handler with improved logic
+// URL state management removed for better performance
+// Can be re-enabled for sharing functionality when needed
 
 function ReparentingHandler() {
     const editor = useEditor();
     const isProcessingRef = React.useRef(false);
+    const dragDropManager = React.useMemo(() => new DragDropManager(editor), [editor]);
 
     React.useEffect(() => {
         const listener = editor.store.listen(
@@ -76,9 +194,15 @@ function ReparentingHandler() {
                 }
 
                 if (wasDrag) {
-                    // Use a longer timeout and set processing flag to prevent recursion
                     setTimeout(() => {
                         if (isProcessingRef.current) return;
+                        
+                        // Check if user is still dragging
+                        const isDragging = editor.getInstanceState().isChangingStyle || 
+                                         editor.getInstanceState().isMoving;
+                        
+                        if (isDragging) return; // Skip reparenting while actively dragging
+                        
                         isProcessingRef.current = true;
 
                         try {
@@ -91,11 +215,9 @@ function ReparentingHandler() {
                                 if (shape.type === 'arrow') return;
 
                                 const shapeProps = shape.props as BaseInfraShapeProps;
-                                // Skip container shapes to prevent moving containers into themselves
-                                if (shapeProps.isBoundingBox) return;
-
                                 const shapeCenter = { x: shape.x + (shapeProps.w || 0) / 2, y: shape.y + (shapeProps.h || 0) / 2 };
-                                const newParentId = findContainingBoundingBox(editor, shapeCenter, shape.id);
+                                const currentParentId = shape.parentId === editor.getCurrentPageId() ? undefined : shape.parentId;
+                                const newParentId = dragDropManager.findBestContainer(shapeCenter, shape.id, currentParentId);
                                 const currentPageId = editor.getCurrentPageId();
 
                                 // Only add to reparent list if the parent is actually changing
@@ -106,12 +228,11 @@ function ReparentingHandler() {
                                 }
                             });
 
-                            // Batch the reparenting operations to reduce store updates
+                            // Batch the reparenting operations with validation
                             if (shapesToReparent.length > 0) {
                                 editor.batch(() => {
                                     shapesToReparent.forEach(({ shapeId, newParentId }) => {
-                                        editor.reparentShapes([shapeId], newParentId);
-                                        editor.bringToFront([shapeId]);
+                                        dragDropManager.reparentShape(shapeId, newParentId);
                                     });
                                 });
                             }
@@ -121,7 +242,7 @@ function ReparentingHandler() {
                                 isProcessingRef.current = false;
                             }, 100);
                         }
-                    }, 50); // Increased timeout to allow drag operation to complete
+                    }, 150); // Increased timeout for smoother dragging
                 }
             },
             { source: 'user', scope: 'document' }
@@ -130,7 +251,7 @@ function ReparentingHandler() {
         return () => {
             listener();
         };
-    }, [editor]);
+    }, [editor, dragDropManager]);
 
     return null;
 }
@@ -138,8 +259,10 @@ function ReparentingHandler() {
 function DropZone() {
     const editor = useEditor();
     const provider = useProvider();
+    const dragDropManager = React.useMemo(() => new DragDropManager(editor), [editor]);
 
     useTldrawThemeSync();
+    useInitialUrlLoad(); // Load shared canvas state on initial load only
 
     const [connectMode, setConnectMode] = React.useState(false);
     const [labelMode, setLabelMode] = React.useState(false);
@@ -148,14 +271,9 @@ function DropZone() {
 
     React.useEffect(() => {
         const handleDrop = (e: DragEvent) => {
-            if (e.defaultPrevented) return; // Prevent duplicate handling
+            if (e.defaultPrevented) return;
             e.preventDefault();
             e.stopPropagation();
-
-            // Remove the event listeners immediately to avoid double firing
-            const container = editor.getContainer();
-            container.removeEventListener('drop', handleDrop);
-            container.removeEventListener('dragover', handleDragOver);
 
             const compId = e.dataTransfer?.getData('application/x-infrageni-component');
             if (!compId) return;
@@ -163,12 +281,7 @@ function DropZone() {
             if (!comp) return;
 
             const point = editor.screenToPage({ x: e.clientX, y: e.clientY });
-            const parentId = findContainingBoundingBox(editor, point) || undefined;
-            const shape = createComponentShape(comp, point.x, point.y, provider, parentId);
-            const createdShape = editor.createShape(shape);
-            if (createdShape) {
-                editor.bringToFront([createdShape.id as TLShapeId]);
-            }
+            dragDropManager.createShapeWithParent(comp, point, provider);
         };
 
         const handleDragOver = (e: DragEvent) => e.preventDefault();
@@ -181,7 +294,7 @@ function DropZone() {
             container.removeEventListener('drop', handleDrop);
             container.removeEventListener('dragover', handleDragOver);
         };
-    }, [editor, provider]);
+    }, [editor, provider, dragDropManager]);
 
     return (
         <>
@@ -215,8 +328,9 @@ export function Canvas() {
             <Tldraw
                 className="w-full h-full"
                 shapeUtils={customShapeUtils}
+                inferDarkMode
+                persistenceKey="infra-builder"
             >
-                <UrlState />
                 <DropZone />
                 <ReparentingHandler />
             </Tldraw>
