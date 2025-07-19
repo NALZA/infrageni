@@ -149,9 +149,9 @@ export class ComponentRegistry {
    * Load provider-specific components
    */
   private async loadProviderComponents(): Promise<void> {
-    const { getAwsComponents } = await import('./aws-components');
-    const { getAzureComponents } = await import('./azure-components');
-    const { getGcpComponents } = await import('./gcp-components');
+    const { getAwsComponents } = await import('../providers/aws-components');
+    const { getAzureComponents } = await import('../providers/azure-components');
+    const { getGcpComponents } = await import('../providers/gcp-components');
     
     const awsComponents = await getAwsComponents();
     const azureComponents = await getAzureComponents();

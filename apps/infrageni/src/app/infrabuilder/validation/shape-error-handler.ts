@@ -65,7 +65,18 @@ export class ShapeCorrector {
     
     // Auto-correct shape properties
     static correctShapeProperties(props: Partial<BaseInfraShapeProps>): BaseInfraShapeProps {
-        const validComponentIds = ['vpc', 'subnet', 'availability-zone', 'compute', 'database', 'storage', 'external-system', 'user'];
+        const validComponentIds = [
+            // Legacy IDs
+            'vpc', 'subnet', 'availability-zone', 'compute', 'database', 'storage', 'external-system', 'user',
+            // New enhanced IDs
+            'generic-vpc', 'generic-subnet', 'generic-availability-zone', 'generic-compute', 'generic-database', 'generic-storage', 'generic-external-system', 'generic-user',
+            // Provider-specific IDs (AWS)
+            'aws-lambda', 'aws-elastic-beanstalk', 'aws-ecs', 'aws-ecr', 'aws-dynamodb', 'aws-elasticache', 'aws-application-load-balancer', 'aws-cloudfront', 'aws-api-gateway', 'aws-ebs', 'aws-efs',
+            // Provider-specific IDs (Azure)
+            'azure-functions', 'azure-app-service', 'azure-container-instances', 'azure-cosmos-db', 'azure-cache-redis', 'azure-application-gateway', 'azure-cdn', 'azure-storage-account', 'azure-key-vault', 'azure-monitor',
+            // Provider-specific IDs (GCP)
+            'gcp-cloud-functions', 'gcp-app-engine', 'gcp-cloud-run', 'gcp-cloud-firestore', 'gcp-cloud-spanner', 'gcp-memorystore', 'gcp-cloud-load-balancing', 'gcp-cloud-cdn', 'gcp-cloud-storage', 'gcp-pub-sub', 'gcp-secret-manager'
+        ];
         
         return {
             w: ShapeCorrector.correctNumber(props.w, 20, 2000, 120),

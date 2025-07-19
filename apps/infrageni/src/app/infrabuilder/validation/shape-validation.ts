@@ -218,6 +218,12 @@ export function validateShapeProperties(props: Partial<BaseInfraShapeProps>): Va
 export function validateShape(shapeType: string, props: BaseInfraShapeProps): ValidationResult {
     const baseValidation = validateShapeProperties(props);
     
+    // Helper function to normalize component IDs for validation
+    const normalizeComponentId = (id: string): string => {
+        // Remove provider prefixes (generic-, aws-, azure-, gcp-)
+        return id.replace(/^(generic-|aws-|azure-|gcp-)/, '');
+    };
+
     // Type-specific validations
     const typeValidations: Record<string, (props: BaseInfraShapeProps) => ValidationResult> = {
         vpc: (props) => {
@@ -246,8 +252,9 @@ export function validateShape(shapeType: string, props: BaseInfraShapeProps): Va
         }
     };
     
-    if (typeValidations[shapeType]) {
-        const typeResult = typeValidations[shapeType](props);
+    const normalizedShapeType = normalizeComponentId(shapeType);
+    if (typeValidations[normalizedShapeType]) {
+        const typeResult = typeValidations[normalizedShapeType](props);
         baseValidation.warnings.push(...typeResult.warnings);
         baseValidation.errors.push(...typeResult.errors);
         if (!typeResult.isValid) {

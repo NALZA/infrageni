@@ -19,11 +19,11 @@ class DragDropManager {
     private lastReparentTime: number = 0;
     private readonly REPARENT_COOLDOWN = 200; // Minimum time between reparenting operations
     private readonly HYSTERESIS_MARGIN = 20; // Buffer zone to prevent rapid switching
-    
+
     constructor(editor: ReturnType<typeof useEditor>) {
         this.editor = editor;
     }
-    
+
     // Performance monitoring for debugging
     private measurePerformance<T>(name: string, fn: () => T): T {
         const start = performance.now();
@@ -34,7 +34,7 @@ class DragDropManager {
         }
         return result;
     }
-    
+
     // Check if a point is inside a container shape
     private isPointInContainer(point: { x: number; y: number }, shape: TLShape): boolean {
         const { x, y, props } = shape;
@@ -44,7 +44,7 @@ class DragDropManager {
             point.y >= y &&
             point.y <= y + shapeProps.h;
     }
-    
+
     // Find the most appropriate container for a point with hysteresis
     public findBestContainer(point: { x: number; y: number }, excludeShapeId?: TLShapeId, currentParentId?: TLShapeId): TLShapeId | null {
         return this.measurePerformance('findBestContainer', () => {
@@ -55,9 +55,9 @@ class DragDropManager {
                     shape.id !== excludeShapeId &&
                     this.isPointInContainer(point, shape);
             });
-            
+
             if (containers.length === 0) return null;
-            
+
             // Apply hysteresis: if already in a container, require more distance to switch
             if (currentParentId) {
                 const currentParent = containers.find(c => c.id === currentParentId);
@@ -65,18 +65,18 @@ class DragDropManager {
                     const currentProps = currentParent.props as BaseInfraShapeProps;
                     // Check if point is still within hysteresis margin of current container
                     const margin = this.HYSTERESIS_MARGIN;
-                    const withinHysteresis = 
+                    const withinHysteresis =
                         point.x >= currentParent.x - margin &&
                         point.x <= currentParent.x + currentProps.w + margin &&
                         point.y >= currentParent.y - margin &&
                         point.y <= currentParent.y + currentProps.h + margin;
-                    
+
                     if (withinHysteresis) {
                         return currentParentId;
                     }
                 }
             }
-            
+
             // Return the smallest container (most specific)
             return containers.reduce((smallest: TLShape, current: TLShape) => {
                 const smallestProps = smallest.props as BaseInfraShapeProps;
@@ -87,70 +87,70 @@ class DragDropManager {
             }).id;
         });
     }
-    
+
     // Check if a container can hold another container (prevent invalid nesting)
     private canContainContainer(parentContainer: TLShape, childContainer: TLShape): boolean {
         const parentProps = parentContainer.props as BaseInfraShapeProps;
         const childProps = childContainer.props as BaseInfraShapeProps;
-        
+
         // Define containment rules based on component types
         const parentType = parentProps.componentId;
         const childType = childProps.componentId;
-        
+
         // VPC can contain subnets and availability zones
         if (parentType === 'vpc') {
             return childType === 'subnet' || childType === 'availability-zone';
         }
-        
+
         // Availability zones can contain subnets
         if (parentType === 'availability-zone') {
             return childType === 'subnet';
         }
-        
+
         // Subnets can contain non-container components
         if (parentType === 'subnet') {
             return !childProps.isBoundingBox;
         }
-        
+
         return true; // Default: allow containment
     }
-    
+
     // Enhanced reparenting with validation and cooldown
     public reparentShape(shapeId: TLShapeId, newParentId: TLParentId): boolean {
         const now = Date.now();
-        
+
         // Apply cooldown to prevent rapid reparenting
         if (now - this.lastReparentTime < this.REPARENT_COOLDOWN) {
             return false;
         }
-        
+
         const shape = this.editor.getShape(shapeId);
         const newParent = newParentId !== this.editor.getCurrentPageId() ? this.editor.getShape(newParentId as TLShapeId) : null;
-        
+
         if (!shape) return false;
-        
+
         // If moving to a container, validate the containment
         if (newParent) {
             const shapeProps = shape.props as BaseInfraShapeProps;
             const parentProps = newParent.props as BaseInfraShapeProps;
-            
+
             // Prevent containers from containing themselves or invalid nesting
             if (shapeProps.isBoundingBox && !this.canContainContainer(newParent, shape)) {
                 return false;
             }
         }
-        
+
         this.editor.reparentShapes([shapeId], newParentId);
         this.editor.bringToFront([shapeId]);
         this.lastReparentTime = now;
         return true;
     }
-    
+
     // Create a new shape with proper parent assignment
     public createShapeWithParent(component: any, point: { x: number; y: number }, provider: string): TLShape | null {
         const parentId = this.findBestContainer(point);
         const shape = createComponentShape(component, point.x, point.y, provider, parentId);
-        
+
         const createdShape = this.editor.createShape(shape);
         if (createdShape) {
             this.editor.bringToFront([createdShape.id as TLShapeId]);
@@ -196,13 +196,13 @@ function ReparentingHandler() {
                 if (wasDrag) {
                     setTimeout(() => {
                         if (isProcessingRef.current) return;
-                        
+
                         // Check if user is still dragging
-                        const isDragging = editor.getInstanceState().isChangingStyle || 
-                                         editor.getInstanceState().isMoving;
-                        
+                        const isDragging = editor.getInstanceState().isChangingStyle ||
+                            editor.getInstanceState().isMoving;
+
                         if (isDragging) return; // Skip reparenting while actively dragging
-                        
+
                         isProcessingRef.current = true;
 
                         try {
@@ -324,9 +324,15 @@ function DropZone() {
 
 export function Canvas() {
     return (
-        <main className="flex-1 glass-panel rounded-lg relative min-h-[400px] overflow-hidden">
+        <main className="flex-1 glass-panel rounded-lg relative min-h-[400px] overflow-hidden group">
+            {/* Enhanced glass background with gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-purple-50/20 dark:from-blue-950/20 dark:via-transparent dark:to-purple-950/10 pointer-events-none" />
+
+            {/* Subtle pattern overlay */}
+            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05] bg-[radial-gradient(circle_at_1px_1px,_rgba(99,102,241,0.15)_1px,_transparent_0)] bg-[length:20px_20px] pointer-events-none" />
+
             <Tldraw
-                className="w-full h-full"
+                className="w-full h-full canvas-enhanced relative z-10"
                 shapeUtils={customShapeUtils}
                 inferDarkMode
                 persistenceKey="infra-builder"
@@ -334,6 +340,10 @@ export function Canvas() {
                 <DropZone />
                 <ReparentingHandler />
             </Tldraw>
+
+            {/* Floating animation elements */}
+            <div className="absolute top-4 right-4 w-2 h-2 bg-primary/20 rounded-full animate-pulse pointer-events-none" />
+            <div className="absolute bottom-6 left-6 w-1 h-1 bg-primary/30 rounded-full animate-ping pointer-events-none" style={{ animationDelay: '1s' }} />
         </main>
     );
 }

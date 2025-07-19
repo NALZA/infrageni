@@ -5,7 +5,8 @@
       "WebFetch(domain:tldraw.dev)",
       "mcp__nx-mcp__nx_workspace",
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__nx-mcp__nx_project_details"
+      "mcp__nx-mcp__nx_project_details",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -1,6 +1,9 @@
 import { createShapeId, TLShapeId } from 'tldraw';
 import { GenericComponent } from '../components';
-import { validateShape, formatValidationErrors } from '../validation/shape-validation';
+import {
+  validateShape,
+  formatValidationErrors,
+} from '../validation/shape-validation';
 import { handleShapeCreationError } from '../validation/shape-error-handler';
 
 // Import all shape utils for the customShapeUtils array
@@ -87,10 +90,80 @@ export function createComponentShape(
   // Update baseProps with validated properties
   baseProps.props = {
     ...baseProps.props,
-    ...validatedBaseProps
+    ...validatedBaseProps,
   };
 
-  switch (component.id) {
+  // Create a mapping function to determine the base component type
+  const getBaseComponentType = (componentId: string): string => {
+    // Handle legacy component IDs (backwards compatibility)
+    if (
+      [
+        'vpc',
+        'subnet',
+        'availability-zone',
+        'compute',
+        'database',
+        'storage',
+        'external-system',
+        'user',
+      ].includes(componentId)
+    ) {
+      return componentId;
+    }
+
+    // Handle new component IDs - extract the base type
+    // Examples: 'generic-vpc' → 'vpc', 'aws-lambda' → 'compute', 'azure-functions' → 'compute'
+    if (componentId.startsWith('generic-')) {
+      return componentId.replace('generic-', '');
+    }
+
+    // Map provider-specific components to their base types
+    const componentTypeMap: Record<string, string> = {
+      // AWS components
+      'aws-lambda': 'compute',
+      'aws-elastic-beanstalk': 'compute',
+      'aws-ecs': 'compute',
+      'aws-ecr': 'storage',
+      'aws-dynamodb': 'database',
+      'aws-elasticache': 'database',
+      'aws-application-load-balancer': 'compute',
+      'aws-cloudfront': 'compute',
+      'aws-api-gateway': 'compute',
+      'aws-ebs': 'storage',
+      'aws-efs': 'storage',
+
+      // Azure components
+      'azure-functions': 'compute',
+      'azure-app-service': 'compute',
+      'azure-container-instances': 'compute',
+      'azure-cosmos-db': 'database',
+      'azure-cache-redis': 'database',
+      'azure-application-gateway': 'compute',
+      'azure-cdn': 'compute',
+      'azure-storage-account': 'storage',
+      'azure-key-vault': 'storage',
+      'azure-monitor': 'compute',
+
+      // GCP components
+      'gcp-cloud-functions': 'compute',
+      'gcp-app-engine': 'compute',
+      'gcp-cloud-run': 'compute',
+      'gcp-cloud-firestore': 'database',
+      'gcp-cloud-spanner': 'database',
+      'gcp-memorystore': 'database',
+      'gcp-cloud-load-balancing': 'compute',
+      'gcp-cloud-cdn': 'compute',
+      'gcp-cloud-storage': 'storage',
+      'gcp-pub-sub': 'compute',
+      'gcp-secret-manager': 'storage',
+    };
+
+    return componentTypeMap[componentId] || 'compute'; // Default to compute for unknown types
+  };
+
+  const baseType = getBaseComponentType(component.id);
+
+  switch (baseType) {
     case 'vpc':
       return {
         ...baseProps,
@@ -173,27 +246,13 @@ export function createComponentShape(
         },
       };
     default:
-      // Fallback to note shape for unknown types
+      // Fallback to compute shape for unknown types (instead of note)
       return {
         ...baseProps,
-        type: 'note' as const,
+        type: 'compute' as const,
         props: {
-          color: 'yellow',
-          size: 'm' as const,
-          richText: {
-            type: 'doc',
-            content: [
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: label,
-                  },
-                ],
-              },
-            ],
-          },
+          ...baseProps.props,
+          color: 'gray',
         },
       };
   }

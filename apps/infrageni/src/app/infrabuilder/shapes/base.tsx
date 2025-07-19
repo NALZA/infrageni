@@ -8,6 +8,7 @@ import { GENERIC_COMPONENTS, useProvider } from '../components';
 import { getProviderIcon } from './provider-icons';
 import { validateShapeProperties, ValidationResult } from '../validation/shape-validation';
 import { handleShapeUpdateError, handleShapeCreationError } from '../validation/shape-error-handler';
+import { ComponentRegistry } from '../components/core/component-registry';
 
 // Base shape type interface
 export interface BaseInfraShapeProps {
@@ -22,6 +23,25 @@ export interface BaseInfraShapeProps {
 
 // Helper function to get provider-specific label
 export function getProviderSpecificLabel(componentId: string, provider: string): string {
+    // Try to get from enhanced component registry first
+    const registry = ComponentRegistry.getInstance();
+    const enhancedComponent = registry.getComponent(componentId);
+
+    if (enhancedComponent) {
+        const providerMapping = enhancedComponent.providerMappings[provider];
+        if (providerMapping) {
+            return providerMapping.name;
+        }
+        // Fallback to generic mapping if specific provider not found
+        const genericMapping = enhancedComponent.providerMappings.generic;
+        if (genericMapping) {
+            return genericMapping.name;
+        }
+        // Final fallback to component name
+        return enhancedComponent.name;
+    }
+
+    // Fallback to legacy components for backward compatibility
     const component = GENERIC_COMPONENTS.find(c => c.id === componentId);
     if (!component) return componentId;
     return component.providerNames[provider] || component.label;
@@ -54,7 +74,7 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
     // Hook for shape validation on updates
     override onBeforeUpdate(prev: T, next: T) {
         const correctedProps = handleShapeUpdateError(next.type, prev.props, next.props);
-        
+
         // Return shape with corrected properties if needed
         return {
             ...next,
@@ -65,7 +85,7 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
     // Hook for shape validation on creation
     override onBeforeCreate(shape: T) {
         const correctedProps = handleShapeCreationError(shape.type, shape.props);
-        
+
         // Return shape with corrected properties if needed
         return {
             ...shape,
@@ -118,7 +138,7 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
                     flexDirection: 'column',
                     border: `2px solid ${borderColor}`,
                     borderRadius: '8px',
-                    backgroundColor: shape.props.isBoundingBox 
+                    backgroundColor: shape.props.isBoundingBox
                         ? `rgba(255, 255, 255, ${shape.props.opacity || 0.1})`
                         : 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(10px)',

@@ -14,6 +14,16 @@
             "date": 1752759301159,
             "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-17.log",
             "hash": "edc8de916a0a64d2b319afe916dd0670aa518fa0853f470fb788514383dae60d"
+        },
+        {
+            "date": 1752807704944,
+            "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-18.log",
+            "hash": "b180efae296039b27fb37fa0cff4e9f5a51441114c97a4f2105a50ba9596e20f"
+        },
+        {
+            "date": 1752902272074,
+            "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-19.log",
+            "hash": "c112675c9efb91dc89ddb5cd9964023945a519d95d921f093c49bc127b9ef41c"
         }
     ],
     "hashType": "sha256"

@@ -191,6 +191,22 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+@utility glass-panel {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(var(--backdrop-blur-glass-lg));
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-glass-lg);
+  box-shadow: var(--shadow-glass-lg);
+  color: rgba(0, 0, 0, 0.9);
+  transition: all var(--duration-glass) ease-in-out;
+}
+
+.dark .glass-panel {
+  background: rgba(16, 16, 16, 0.2);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
 /* ===== ANIMATIONS ===== */
 
 @keyframes float {
@@ -277,6 +293,264 @@
 
 .dialog-overlay * {
   position: relative;
+}
+
+/* ===== TLDRAW GLASS MORPHISM THEME INTEGRATION ===== */
+
+/* Main tldraw container styling */
+.tldraw__editor {
+  background: transparent !important;
+  border-radius: var(--radius-glass-lg) !important;
+  overflow: hidden !important;
+}
+
+/* Canvas background with subtle glass effect */
+.tl-canvas {
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(1px) !important;
+}
+
+.dark .tl-canvas {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Tldraw UI panels with glass morphism */
+[class*="tlui-panel"] {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: var(--radius-glass-sm) !important;
+  box-shadow: var(--shadow-glass) !important;
+}
+
+.dark [class*="tlui-panel"] {
+  background: rgba(16, 16, 16, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Tldraw toolbar styling */
+.tlui-toolbar {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-lg)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: var(--radius-glass) !important;
+  box-shadow: var(--shadow-glass) !important;
+}
+
+.dark .tlui-toolbar {
+  background: rgba(16, 16, 16, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Tldraw toolbar buttons */
+.tlui-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  border-radius: var(--radius-glass-xs) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-xs)) !important;
+  transition: all var(--duration-glass) ease-in-out !important;
+}
+
+.tlui-button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: var(--shadow-glass-sm) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dark .tlui-button {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .tlui-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Tldraw style panel */
+.tlui-style-panel {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-xl)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: var(--radius-glass-lg) !important;
+  box-shadow: var(--shadow-glass-lg) !important;
+}
+
+.dark .tlui-style-panel {
+  background: rgba(16, 16, 16, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tldraw menus and dropdowns */
+.tlui-menu {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-xl)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: var(--radius-glass) !important;
+  box-shadow: var(--shadow-glass-xl) !important;
+}
+
+.dark .tlui-menu {
+  background: rgba(16, 16, 16, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Tldraw menu items */
+.tlui-button[data-state="hovered"],
+.tlui-button[data-state="open"],
+.tlui-menu__group button:hover {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: var(--color-primary) !important;
+}
+
+.dark .tlui-button[data-state="hovered"],
+.dark .tlui-button[data-state="open"],
+.dark .tlui-menu__group button:hover {
+  background: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Tldraw input fields */
+.tlui-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-xs)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--radius-glass-xs) !important;
+  color: inherit !important;
+}
+
+.dark .tlui-input {
+  background: rgba(16, 16, 16, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===== ENHANCED CANVAS STYLING ===== */
+
+/* Canvas container enhancements */
+.canvas-enhanced {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Canvas hover effects */
+.group:hover .canvas-enhanced::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--duration-glass-slow) ease-out;
+  opacity: 1;
+}
+
+/* Canvas edge glow effect */
+.canvas-enhanced::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1), transparent, rgba(139, 92, 246, 0.1), transparent);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--duration-glass) ease-in-out;
+  pointer-events: none;
+}
+
+.group:hover .canvas-enhanced::after {
+  opacity: 1;
+}
+
+/* Dark mode canvas adjustments */
+.dark .canvas-enhanced::before {
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+}
+
+/* Tldraw background pattern enhancements */
+.tl-background-pattern {
+  opacity: 0.3 !important;
+}
+
+.dark .tl-background-pattern {
+  opacity: 0.15 !important;
+}
+
+/* Custom tldraw grid styling */
+.tl-grid {
+  stroke: rgba(99, 102, 241, 0.1) !important;
+  stroke-width: 0.5 !important;
+}
+
+.dark .tl-grid {
+  stroke: rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Shape selection styling */
+.tl-shape-indicator {
+  stroke: var(--color-primary) !important;
+  stroke-width: 2 !important;
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3)) !important;
+}
+
+/* Enhanced cursor styling */
+.tl-cursor {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+}
+
+.dark .tl-cursor {
+  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.1)) !important;
+}
+
+/* Canvas loading states with glass morphism */
+.tl-loading {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass-lg)) !important;
+  border-radius: var(--radius-glass-lg) !important;
+}
+
+.dark .tl-loading {
+  background: rgba(16, 16, 16, 0.9) !important;
+}
+
+/* Canvas minimap styling */
+.tl-minimap {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(var(--backdrop-blur-glass)) !important;
+  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: var(--radius-glass-sm) !important;
+  box-shadow: var(--shadow-glass) !important;
+}
+
+.dark .tl-minimap {
+  background: rgba(16, 16, 16, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Canvas collaboration cursors */
+.tl-collaborator-cursor {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2)) !important;
+}
+
+.dark .tl-collaborator-cursor {
+  filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.1)) !important;
+}
+
+/* Glass morphism animations for canvas elements */
+@keyframes canvas-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.2), 0 0 40px rgba(139, 92, 246, 0.1);
+  }
+}
+
+.canvas-enhanced:focus-within {
+  animation: canvas-glow 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas-enhanced:focus-within {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
 }
 
 /* ===== TLDRAW Z-INDEX OVERRIDES ===== */
