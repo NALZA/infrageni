@@ -18,8 +18,9 @@ import { useInitialUrlLoad } from './hooks/useInitialUrlLoad';
 class DragDropManager {
     private editor: ReturnType<typeof useEditor>;
     private lastReparentTime: number = 0;
-    private readonly REPARENT_COOLDOWN = 200; // Minimum time between reparenting operations
-    private readonly HYSTERESIS_MARGIN = 20; // Buffer zone to prevent rapid switching
+    private readonly REPARENT_COOLDOWN = 500; // Minimum time between reparenting operations
+    private readonly HYSTERESIS_MARGIN = 50; // Buffer zone to prevent rapid switching
+    private lastReparentedShapes: Map<string, { parentId: string; timestamp: number }> = new Map();
 
     constructor(editor: ReturnType<typeof useEditor>) {
         this.editor = editor;
@@ -119,16 +120,33 @@ class DragDropManager {
     // Enhanced reparenting with validation and cooldown
     public reparentShape(shapeId: TLShapeId, newParentId: TLParentId): boolean {
         const now = Date.now();
+        const shape = this.editor.getShape(shapeId);
+        if (!shape) return false;
 
-        // Apply cooldown to prevent rapid reparenting
+        const currentParentId = shape.parentId;
+        const newParentIdStr = newParentId === this.editor.getCurrentPageId() ? 'page' : newParentId as string;
+        const currentParentIdStr = currentParentId === this.editor.getCurrentPageId() ? 'page' : currentParentId as string;
+        
+        // Check if we're trying to reparent to the same parent
+        if (currentParentIdStr === newParentIdStr) {
+            return false;
+        }
+
+        // Apply global cooldown to prevent rapid reparenting
         if (now - this.lastReparentTime < this.REPARENT_COOLDOWN) {
             return false;
         }
 
-        const shape = this.editor.getShape(shapeId);
-        const newParent = newParentId !== this.editor.getCurrentPageId() ? this.editor.getShape(newParentId as TLShapeId) : null;
+        // Check per-shape cooldown to prevent oscillation
+        const lastReparent = this.lastReparentedShapes.get(shapeId);
+        if (lastReparent && now - lastReparent.timestamp < this.REPARENT_COOLDOWN * 2) {
+            // If this is the same transition we just did, apply extra cooldown
+            if (lastReparent.parentId === newParentIdStr) {
+                return false;
+            }
+        }
 
-        if (!shape) return false;
+        const newParent = newParentId !== this.editor.getCurrentPageId() ? this.editor.getShape(newParentId as TLShapeId) : null;
 
         // If moving to a container, validate the containment
         if (newParent) {
@@ -141,85 +159,77 @@ class DragDropManager {
             }
         }
 
-        // Get the current parent (if any)
-        const currentParent = shape.parentId !== this.editor.getCurrentPageId() ? this.editor.getShape(shape.parentId as TLShapeId) : null;
-        
-        // Calculate the absolute position in page coordinates
-        let absoluteX = shape.x;
-        let absoluteY = shape.y;
-        
-        // If currently in a container, convert to page coordinates
-        if (currentParent) {
-            absoluteX = shape.x + currentParent.x;
-            absoluteY = shape.y + currentParent.y;
-        }
-        
-        // Calculate the new position based on the new parent
-        let newX = absoluteX;
-        let newY = absoluteY;
-        
-        // If moving into a container, convert to parent-relative coordinates
-        if (newParent) {
-            newX = absoluteX - newParent.x;
-            newY = absoluteY - newParent.y;
-            
-            // Ensure the component stays within container bounds with padding
-            const containerProps = newParent.props as BaseInfraShapeProps;
-            const shapeProps = shape.props as BaseInfraShapeProps;
-            const padding = 10; // 10px padding from container edges
-            
-            // Clamp position within container bounds
-            newX = Math.max(padding, Math.min(newX, containerProps.w - (shapeProps.w || 0) - padding));
-            newY = Math.max(padding, Math.min(newY, containerProps.h - (shapeProps.h || 0) - padding));
-        }
-        
-        // Debug logging for coordinate transformations
+        // Debug logging
         console.log(`🔄 Reparenting shape:`, {
             shapeId,
-            originalPos: { x: shape.x, y: shape.y },
-            absolutePos: { x: absoluteX, y: absoluteY },
-            newPos: { x: newX, y: newY },
-            currentParent: currentParent?.id || 'page',
-            newParent: newParent?.id || 'page'
+            currentParent: currentParentIdStr,
+            newParent: newParentIdStr
         });
-        
-        // Update the shape position before reparenting
-        this.editor.updateShape({
-            id: shapeId,
-            type: shape.type,
-            x: newX,
-            y: newY
+
+        // Use tldraw's native reparenting - this preserves visual position automatically
+        // The shape will appear in exactly the same screen position after reparenting
+        this.editor.batch(() => {
+            this.editor.reparentShapes([shapeId], newParentId);
+            this.editor.bringToFront([shapeId]);
         });
-        
-        this.editor.reparentShapes([shapeId], newParentId);
-        this.editor.bringToFront([shapeId]);
+
+        // Track this reparenting operation
+        this.lastReparentedShapes.set(shapeId, { parentId: currentParentIdStr, timestamp: now });
         this.lastReparentTime = now;
+        
+        // Clean up old entries (older than 2 seconds)
+        const cutoff = now - 2000;
+        for (const [key, value] of this.lastReparentedShapes.entries()) {
+            if (value.timestamp < cutoff) {
+                this.lastReparentedShapes.delete(key);
+            }
+        }
+        
         return true;
     }
 
     // Create a new shape with proper parent assignment
     public createShapeWithParent(component: any, point: { x: number; y: number }, provider: string): TLShape | null {
+        // Validate input coordinates
+        if (!isFinite(point.x) || !isFinite(point.y)) {
+            console.error(`🚨 Invalid point coordinates for shape creation:`, point);
+            return null;
+        }
+
         const parentId = this.findBestContainer(point);
-        
+
         // If creating inside a container, convert coordinates to be relative to the container
         let shapeX = point.x;
         let shapeY = point.y;
-        
+
         if (parentId) {
             const parent = this.editor.getShape(parentId);
             if (parent) {
+                // Validate parent coordinates
+                if (!isFinite(parent.x) || !isFinite(parent.y)) {
+                    console.error(`🚨 Invalid parent coordinates:`, { parentId, x: parent.x, y: parent.y });
+                    return null;
+                }
+
                 shapeX = point.x - parent.x;
                 shapeY = point.y - parent.y;
-                
+
                 // Ensure shape is within container bounds with padding
                 const parentProps = parent.props as BaseInfraShapeProps;
                 const padding = 10;
                 const shapeW = component.isBoundingBox ? 300 : 120;
                 const shapeH = component.isBoundingBox ? 200 : 80;
-                
-                shapeX = Math.max(padding, Math.min(shapeX, parentProps.w - shapeW - padding));
-                shapeY = Math.max(padding, Math.min(shapeY, parentProps.h - shapeH - padding));
-                
+
+                shapeX = Math.max(padding, Math.min(shapeX, (parentProps.w || 400) - shapeW - padding));
+                shapeY = Math.max(padding, Math.min(shapeY, (parentProps.h || 300) - shapeH - padding));
+
+                // Final validation
+                if (!isFinite(shapeX) || !isFinite(shapeY)) {
+                    console.error(`🚨 Invalid calculated shape coordinates:`, { shapeX, shapeY });
+                    shapeX = padding;
+                    shapeY = padding;
+                }
+
                 console.log(`📦 Creating shape inside container:`, {
                     componentId: component.id,
                     pagePoint: point,
@@ -229,7 +239,13 @@ class DragDropManager {
                 });
             }
         }
-        
+
+        // Final coordinate validation before shape creation
+        if (!isFinite(shapeX) || !isFinite(shapeY)) {
+            console.error(`🚨 Cannot create shape with invalid coordinates:`, { shapeX, shapeY });
+            return null;
+        }
+
         const shape = createComponentShape(component, shapeX, shapeY, provider, parentId);
 
         const createdShape = this.editor.createShape(shape);
@@ -278,9 +294,13 @@ function ReparentingHandler() {
                     setTimeout(() => {
                         if (isProcessingRef.current) return;
 
-                        // Check if user is still dragging
-                        const isDragging = editor.getInstanceState().isChangingStyle ||
-                            editor.getInstanceState().isMoving;
+                        // Check if user is still dragging or interacting
+                        const instanceState = editor.getInstanceState();
+                        const isDragging = instanceState.isChangingStyle ||
+                            instanceState.isMoving ||
+                            instanceState.isPointing ||
+                            editor.getCurrentTool().id === 'hand' ||
+                            editor.getSelectedShapeIds().length > 0 && editor.getIsMenuOpen();
 
                         if (isDragging) return; // Skip reparenting while actively dragging
 
@@ -289,6 +309,14 @@ function ReparentingHandler() {
                         try {
                             const selectedShapes = editor.getSelectedShapes();
                             if (selectedShapes.length === 0) return;
+                            
+                            // Double-check that no shapes are being actively manipulated
+                            const hasActiveTransforms = selectedShapes.some(shape => {
+                                const pageTransform = editor.getShapePageTransform(shape.id);
+                                return !pageTransform || !isFinite(pageTransform.x) || !isFinite(pageTransform.y);
+                            });
+                            
+                            if (hasActiveTransforms) return;
 
                             const shapesToReparent: { shapeId: TLShapeId; newParentId: TLParentId }[] = [];
 
@@ -296,7 +324,27 @@ function ReparentingHandler() {
                                 if (shape.type === 'arrow') return;
 
                                 const shapeProps = shape.props as BaseInfraShapeProps;
-                                const shapeCenter = { x: shape.x + (shapeProps.w || 0) / 2, y: shape.y + (shapeProps.h || 0) / 2 };
+                                
+                                // Use the shape's current absolute position to determine container
+                                const absoluteTransform = editor.getShapePageTransform(shape.id);
+                                let shapeCenter;
+                                
+                                if (absoluteTransform && isFinite(absoluteTransform.x) && isFinite(absoluteTransform.y)) {
+                                    shapeCenter = { 
+                                        x: absoluteTransform.x + (shapeProps.w || 0) / 2, 
+                                        y: absoluteTransform.y + (shapeProps.h || 0) / 2 
+                                    };
+                                } else {
+                                    // Fallback calculation
+                                    const currentParent = shape.parentId !== editor.getCurrentPageId() ? editor.getShape(shape.parentId as TLShapeId) : null;
+                                    const absoluteX = currentParent ? shape.x + currentParent.x : shape.x;
+                                    const absoluteY = currentParent ? shape.y + currentParent.y : shape.y;
+                                    shapeCenter = { 
+                                        x: absoluteX + (shapeProps.w || 0) / 2, 
+                                        y: absoluteY + (shapeProps.h || 0) / 2 
+                                    };
+                                }
+                                
                                 const currentParentId = shape.parentId === editor.getCurrentPageId() ? undefined : shape.parentId;
                                 const newParentId = dragDropManager.findBestContainer(shapeCenter, shape.id, currentParentId);
                                 const currentPageId = editor.getCurrentPageId();
@@ -323,7 +371,7 @@ function ReparentingHandler() {
                                 isProcessingRef.current = false;
                             }, 100);
                         }
-                    }, 150); // Increased timeout for smoother dragging
+                    }, 500); // Longer timeout to ensure user has completely finished interacting
                 }
             },
             { source: 'user', scope: 'document' }
@@ -362,22 +410,22 @@ function DropZone() {
                 console.warn('⚠️ No component ID found in drop data');
                 return;
             }
-            
+
             // Try new component registry first (with error handling for timing issues)
             try {
                 const registry = ComponentRegistry.getInstance();
-                
+
                 // Check if registry is initialized
                 if (registry.getAllComponents().length === 0) {
                     console.warn('⚠️ Component registry not yet initialized, using legacy fallback');
                     throw new Error('Registry not initialized');
                 }
-                
+
                 const enhancedComponent = registry.getComponent(compId);
-                
+
                 if (enhancedComponent) {
                     console.log('✅ Found component in registry:', enhancedComponent.name);
-                    
+
                     // Convert ComponentMetadata to GenericComponent format for compatibility
                     const providerMapping = enhancedComponent.providerMappings[provider] || enhancedComponent.providerMappings.generic;
                     const comp = {
@@ -388,7 +436,7 @@ function DropZone() {
                         ),
                         isBoundingBox: enhancedComponent.config.isContainer
                     };
-                    
+
                     const point = editor.screenToPage({ x: e.clientX, y: e.clientY });
                     dragDropManager.createShapeWithParent(comp, point, provider);
                     return;
@@ -398,7 +446,7 @@ function DropZone() {
             } catch (error) {
                 console.warn('⚠️ Registry error, falling back to legacy components:', error);
             }
-            
+
             // Fallback to legacy components
             const comp = GENERIC_COMPONENTS.find(c => c.id === compId);
             if (!comp) {

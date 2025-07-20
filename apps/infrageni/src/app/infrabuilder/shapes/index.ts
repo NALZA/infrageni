@@ -60,6 +60,13 @@ export function createComponentShape(
   provider: string,
   parentId?: TLShapeId
 ) {
+  // Validate input coordinates
+  if (!isFinite(x) || !isFinite(y)) {
+    console.error(`🚨 createComponentShape received invalid coordinates:`, { x, y, componentId: component.id });
+    x = isFinite(x) ? x : 100;
+    y = isFinite(y) ? y : 100;
+  }
+  
   const shapeId = createShapeId();
   const label = component.providerNames[provider] || component.label;
 
