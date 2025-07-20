@@ -1,0 +1,101 @@
+/* Glass Theme for tldraw Canvas */
+.tl-background {
+  background: rgba(255, 255, 255, 0.01) ; /* Light glass effect */
+  backdrop-filter: blur(2px) !important; /* Blur effect for glass theme */
+  border-radius: 0.5rem !important; /* Rounded corners for a modern look */
+}
+
+/* Override tldraw's default background with glass theme */
+.tldraw__editor .tl-background__wrapper {
+  background: transparent !important;
+}
+
+.tldraw__editor .tl-background {
+  background: transparent !important;
+}
+
+/* Glass-themed grid styling */
+.tldraw__editor .tl-grid {
+  opacity: 0.15 !important;
+}
+
+.tldraw__editor[data-color-scheme="light"] .tl-grid {
+  stroke: rgba(99, 102, 241, 0.2) !important; /* Blue grid in light mode */
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-grid {
+  stroke: rgba(147, 197, 253, 0.25) !important; /* Light blue grid in dark mode */
+}
+
+/* Enhance grid pattern to match glass theme */
+.tldraw__editor .tl-grid-dot {
+  fill: rgba(99, 102, 241, 0.3) !important;
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-grid-dot {
+  fill: rgba(147, 197, 253, 0.4) !important;
+}
+
+/* Style the canvas container for glass theme integration */
+.canvas-enhanced {
+  background: transparent !important;
+}
+
+.canvas-enhanced .tldraw__editor {
+  background: transparent !important;
+  border-radius: 0.5rem;
+}
+
+/* Override tldraw's viewport background */
+.tldraw__editor .tl-viewport {
+  background: transparent !important;
+}
+
+/* Enhance selection indicators to match glass theme */
+.tldraw__editor .tl-selection-fg,
+.tldraw__editor .tl-selection-bg {
+  stroke: rgba(99, 102, 241, 0.8) !important;
+  fill: rgba(99, 102, 241, 0.1) !important;
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-selection-fg,
+.tldraw__editor[data-color-scheme="dark"] .tl-selection-bg {
+  stroke: rgba(147, 197, 253, 0.9) !important;
+  fill: rgba(147, 197, 253, 0.15) !important;
+}
+
+/* Style handles to match glass theme */
+.tldraw__editor .tl-handle {
+  fill: rgba(99, 102, 241, 0.9) !important;
+  stroke: rgba(255, 255, 255, 0.8) !important;
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-handle {
+  fill: rgba(147, 197, 253, 0.9) !important;
+  stroke: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* Glass theme for connection handles */
+.tldraw__editor .tl-handle[data-type="vertex"] {
+  fill: rgba(59, 130, 246, 0.9) !important;
+  stroke: rgba(255, 255, 255, 0.9) !important;
+  stroke-width: 2px !important;
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-handle[data-type="vertex"] {
+  fill: rgba(96, 165, 250, 0.9) !important;
+  stroke: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Enhance minimap to match glass theme */
+.tldraw__editor .tl-minimap {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.5rem !important;
+}
+
+.tldraw__editor[data-color-scheme="dark"] .tl-minimap {
+  background: rgba(15, 23, 42, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}

@@ -328,20 +328,6 @@
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Tldraw toolbar styling */
-.tlui-toolbar {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(var(--backdrop-blur-glass-lg)) !important;
-  border: var(--spacing-glass-border) solid rgba(255, 255, 255, 0.4) !important;
-  border-radius: var(--radius-glass) !important;
-  box-shadow: var(--shadow-glass) !important;
-}
-
-.dark .tlui-toolbar {
-  background: rgba(16, 16, 16, 0.85) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
 /* Tldraw toolbar buttons */
 .tlui-button {
   background: rgba(255, 255, 255, 0.1) !important;

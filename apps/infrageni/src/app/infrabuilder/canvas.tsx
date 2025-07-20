@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tldraw, useEditor, TLShapeId, TLShape, TLParentId } from 'tldraw';
 import 'tldraw/tldraw.css';
+import './tldraw-glass-theme.css'; // Custom glass theme for tldraw
 import { GENERIC_COMPONENTS, useProvider } from './components';
 import { customShapeUtils, createComponentShape } from './shapes';
 import { BaseInfraShapeProps } from './shapes/base';
