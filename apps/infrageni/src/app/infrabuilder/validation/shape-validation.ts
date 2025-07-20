@@ -1,5 +1,6 @@
 import { BaseInfraShapeProps } from '../shapes/base';
 import { GENERIC_COMPONENTS } from '../components';
+import { ComponentRegistry } from '../components/core/component-registry';
 
 // Validation result interface
 export interface ValidationResult {
@@ -111,10 +112,44 @@ export class ShapeValidator {
             return result;
         }
         
-        const validComponent = GENERIC_COMPONENTS.find(c => c.id === value);
-        if (!validComponent) {
-            result.isValid = false;
-            result.errors.push(`Invalid component ID: ${value}`);
+        // Check both legacy components and new component registry
+        const validLegacyComponent = GENERIC_COMPONENTS.find(c => c.id === value);
+        
+        let validRegistryComponent = false;
+        let registryAvailable = false;
+        try {
+            const registry = ComponentRegistry.getInstance();
+            // Check if registry is initialized by checking if it has components
+            registryAvailable = registry.getAllComponents().length > 0;
+            if (registryAvailable) {
+                validRegistryComponent = registry.getComponent(value) !== undefined;
+            }
+        } catch (error) {
+            // Registry might not be initialized yet, which is ok
+            console.debug('Component registry not available for validation:', error);
+        }
+        
+        // If neither legacy nor registry components are found
+        if (!validLegacyComponent && !validRegistryComponent) {
+            // If registry is not available, be more lenient with validation
+            if (!registryAvailable) {
+                // Check if it looks like a valid component ID pattern
+                const validIdPattern = /^(generic-|aws-|azure-|gcp-)?[a-z]([a-z0-9-]*[a-z0-9])?$/;
+                if (validIdPattern.test(value)) {
+                    // Only warn in debug mode to reduce console noise
+                    console.debug(`Component ID '${value}' validated by pattern (registry unavailable)`);
+                } else {
+                    result.isValid = false;
+                    result.errors.push(`Invalid component ID format: ${value}`);
+                }
+            } else {
+                result.isValid = false;
+                result.errors.push(`Invalid component ID: ${value} (not found in registry or legacy components)`);
+            }
+        } else if (validRegistryComponent) {
+            console.debug(`Component ID '${value}' validated by registry`);
+        } else if (validLegacyComponent) {
+            console.debug(`Component ID '${value}' validated by legacy components`);
         }
         
         return result;

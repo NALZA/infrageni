@@ -163,6 +163,7 @@ export function EnhancedComponentLibrary({
         key={comp.id}
         draggable
         onDragStart={e => {
+          console.log('🎯 Drag started for component:', comp.id, comp.name);
           e.dataTransfer.setData('application/x-infrageni-component', comp.id);
         }}
         className={`
@@ -300,7 +301,7 @@ export function EnhancedComponentLibrary({
 
   if (loading) {
     return (
-      <aside className="w-64 glass-panel border border-white/20 dark:border-white/10 rounded-lg p-4 shrink-0 flex flex-col shadow-lg">
+      <aside className="w-80 h-full glass-panel border border-white/20 dark:border-white/10 rounded-lg p-4 shrink-0 flex flex-col shadow-lg">
         <h2 className="text-lg font-semibold mb-3 text-black/90 dark:text-white/90">Component Library</h2>
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -310,9 +311,9 @@ export function EnhancedComponentLibrary({
   }
 
   return (
-    <aside className="w-80 glass-panel border border-white/20 dark:border-white/10 rounded-lg p-4 shrink-0 flex flex-col shadow-lg">
+    <aside className="w-80 h-full glass-panel border border-white/20 dark:border-white/10 rounded-lg p-4 shrink-0 flex flex-col shadow-lg">
       {/* Header with Tab Switcher */}
-      <div className="mb-4">
+      <div className="mb-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-black/90 dark:text-white/90">
             Library
@@ -410,9 +411,9 @@ export function EnhancedComponentLibrary({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'components' ? (
-          <div className="space-y-4">
+          <div className="space-y-4 pr-2">
             {Object.keys(groupedComponents).length === 0 ? (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 <p className="text-sm">No components found</p>
@@ -427,7 +428,7 @@ export function EnhancedComponentLibrary({
             )}
           </div>
         ) : (
-          <div className="h-full">
+          <div className="h-full pr-2">
             <PatternBrowser
               onPatternSelect={(pattern) => console.log('Pattern selected:', pattern)}
               onPatternPreview={(pattern) => console.log('Pattern preview:', pattern)}
@@ -440,7 +441,7 @@ export function EnhancedComponentLibrary({
       </div>
 
       {/* Stats footer */}
-      <div className="mt-4 pt-3 border-t border-white/20 dark:border-white/10">
+      <div className="mt-4 pt-3 border-t border-white/20 dark:border-white/10 flex-shrink-0">
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           {activeTab === 'components' ? (
             <>{filteredComponents.length} components • {provider.toUpperCase()}</>

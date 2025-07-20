@@ -17,9 +17,9 @@ const InfraBuilder = () => {
     };
 
     return (
-        <div className="flex flex-col h-[80vh] gap-4 p-8">
+        <div className="flex flex-col h-[calc(100vh-5rem)] gap-4 p-8">
             {/* Mode Toggle Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-shrink-0">
                 <div className="flex-1">
                     <ModeToggle
                         isEducationMode={isEducationMode}
@@ -29,16 +29,15 @@ const InfraBuilder = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1">
+            <div className="flex-1 min-h-0">
                 {isEducationMode ? (
                     <EducationModeContainer
                         onExitEducation={handleExitEducation}
                         className="h-full"
                     />
                 ) : (
-                    <div className="flex flex-1 gap-4 h-full">
+                    <div className="flex gap-4 h-full">
                         <EnhancedComponentLibrary
-                            // components={GENERIC_COMPONENTS}
                             favorites={favorites}
                             setFavorites={setFavorites}
                             search={search}

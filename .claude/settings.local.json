@@ -6,7 +6,9 @@
       "mcp__nx-mcp__nx_workspace",
       "mcp__sequential-thinking__sequentialthinking",
       "mcp__nx-mcp__nx_project_details",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

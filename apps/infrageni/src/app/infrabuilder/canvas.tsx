@@ -4,8 +4,9 @@ import 'tldraw/tldraw.css';
 import { GENERIC_COMPONENTS, useProvider } from './components';
 import { customShapeUtils, createComponentShape } from './shapes';
 import { BaseInfraShapeProps } from './shapes/base';
+import { ComponentRegistry } from './components/core/component-registry';
 import { Toolbar } from './toolbar';
-import { ExportDialog } from './export';
+import { EnhancedExportDialog } from './export';
 import { ConnectionGuide } from './connection-guide';
 import { useTldrawThemeSync } from '../lib/use-tldraw-theme-sync';
 import { useInitialUrlLoad } from './hooks/useInitialUrlLoad';
@@ -140,6 +141,56 @@ class DragDropManager {
             }
         }
 
+        // Get the current parent (if any)
+        const currentParent = shape.parentId !== this.editor.getCurrentPageId() ? this.editor.getShape(shape.parentId as TLShapeId) : null;
+        
+        // Calculate the absolute position in page coordinates
+        let absoluteX = shape.x;
+        let absoluteY = shape.y;
+        
+        // If currently in a container, convert to page coordinates
+        if (currentParent) {
+            absoluteX = shape.x + currentParent.x;
+            absoluteY = shape.y + currentParent.y;
+        }
+        
+        // Calculate the new position based on the new parent
+        let newX = absoluteX;
+        let newY = absoluteY;
+        
+        // If moving into a container, convert to parent-relative coordinates
+        if (newParent) {
+            newX = absoluteX - newParent.x;
+            newY = absoluteY - newParent.y;
+            
+            // Ensure the component stays within container bounds with padding
+            const containerProps = newParent.props as BaseInfraShapeProps;
+            const shapeProps = shape.props as BaseInfraShapeProps;
+            const padding = 10; // 10px padding from container edges
+            
+            // Clamp position within container bounds
+            newX = Math.max(padding, Math.min(newX, containerProps.w - (shapeProps.w || 0) - padding));
+            newY = Math.max(padding, Math.min(newY, containerProps.h - (shapeProps.h || 0) - padding));
+        }
+        
+        // Debug logging for coordinate transformations
+        console.log(`🔄 Reparenting shape:`, {
+            shapeId,
+            originalPos: { x: shape.x, y: shape.y },
+            absolutePos: { x: absoluteX, y: absoluteY },
+            newPos: { x: newX, y: newY },
+            currentParent: currentParent?.id || 'page',
+            newParent: newParent?.id || 'page'
+        });
+        
+        // Update the shape position before reparenting
+        this.editor.updateShape({
+            id: shapeId,
+            type: shape.type,
+            x: newX,
+            y: newY
+        });
+        
         this.editor.reparentShapes([shapeId], newParentId);
         this.editor.bringToFront([shapeId]);
         this.lastReparentTime = now;
@@ -149,7 +200,37 @@ class DragDropManager {
     // Create a new shape with proper parent assignment
     public createShapeWithParent(component: any, point: { x: number; y: number }, provider: string): TLShape | null {
         const parentId = this.findBestContainer(point);
-        const shape = createComponentShape(component, point.x, point.y, provider, parentId);
+        
+        // If creating inside a container, convert coordinates to be relative to the container
+        let shapeX = point.x;
+        let shapeY = point.y;
+        
+        if (parentId) {
+            const parent = this.editor.getShape(parentId);
+            if (parent) {
+                shapeX = point.x - parent.x;
+                shapeY = point.y - parent.y;
+                
+                // Ensure shape is within container bounds with padding
+                const parentProps = parent.props as BaseInfraShapeProps;
+                const padding = 10;
+                const shapeW = component.isBoundingBox ? 300 : 120;
+                const shapeH = component.isBoundingBox ? 200 : 80;
+                
+                shapeX = Math.max(padding, Math.min(shapeX, parentProps.w - shapeW - padding));
+                shapeY = Math.max(padding, Math.min(shapeY, parentProps.h - shapeH - padding));
+                
+                console.log(`📦 Creating shape inside container:`, {
+                    componentId: component.id,
+                    pagePoint: point,
+                    containerPos: { x: parent.x, y: parent.y },
+                    relativePos: { x: shapeX, y: shapeY },
+                    containerId: parentId
+                });
+            }
+        }
+        
+        const shape = createComponentShape(component, shapeX, shapeY, provider, parentId);
 
         const createdShape = this.editor.createShape(shape);
         if (createdShape) {
@@ -276,10 +357,57 @@ function DropZone() {
             e.stopPropagation();
 
             const compId = e.dataTransfer?.getData('application/x-infrageni-component');
-            if (!compId) return;
+            console.log('🎯 Drop event triggered with component ID:', compId);
+            if (!compId) {
+                console.warn('⚠️ No component ID found in drop data');
+                return;
+            }
+            
+            // Try new component registry first (with error handling for timing issues)
+            try {
+                const registry = ComponentRegistry.getInstance();
+                
+                // Check if registry is initialized
+                if (registry.getAllComponents().length === 0) {
+                    console.warn('⚠️ Component registry not yet initialized, using legacy fallback');
+                    throw new Error('Registry not initialized');
+                }
+                
+                const enhancedComponent = registry.getComponent(compId);
+                
+                if (enhancedComponent) {
+                    console.log('✅ Found component in registry:', enhancedComponent.name);
+                    
+                    // Convert ComponentMetadata to GenericComponent format for compatibility
+                    const providerMapping = enhancedComponent.providerMappings[provider] || enhancedComponent.providerMappings.generic;
+                    const comp = {
+                        id: enhancedComponent.id,
+                        label: enhancedComponent.name,
+                        providerNames: Object.fromEntries(
+                            Object.entries(enhancedComponent.providerMappings).map(([key, mapping]) => [key, mapping.name])
+                        ),
+                        isBoundingBox: enhancedComponent.config.isContainer
+                    };
+                    
+                    const point = editor.screenToPage({ x: e.clientX, y: e.clientY });
+                    dragDropManager.createShapeWithParent(comp, point, provider);
+                    return;
+                } else {
+                    console.log('⚠️ Component not found in registry, trying legacy:', compId);
+                }
+            } catch (error) {
+                console.warn('⚠️ Registry error, falling back to legacy components:', error);
+            }
+            
+            // Fallback to legacy components
             const comp = GENERIC_COMPONENTS.find(c => c.id === compId);
-            if (!comp) return;
+            if (!comp) {
+                console.error('❌ Component not found in either registry or legacy components:', compId);
+                console.log('Available legacy IDs:', GENERIC_COMPONENTS.map(c => c.id));
+                return;
+            }
 
+            console.log('✅ Found component in legacy array:', comp.label);
             const point = editor.screenToPage({ x: e.clientX, y: e.clientY });
             dragDropManager.createShapeWithParent(comp, point, provider);
         };
@@ -307,7 +435,7 @@ function DropZone() {
                 onShowConnectionGuide={() => setShowConnectionGuide(true)}
             />
             {showExportDialog && (
-                <ExportDialog
+                <EnhancedExportDialog
                     isOpen={showExportDialog}
                     onClose={() => setShowExportDialog(false)}
                 />
