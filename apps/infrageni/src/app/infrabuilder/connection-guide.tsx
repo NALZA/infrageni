@@ -24,10 +24,13 @@ export function ConnectionGuide({ isVisible, onClose }: ConnectionGuideProps) {
                         <h3 className="text-lg font-medium mb-2">How to Connect Components</h3>
                         <ol className="list-decimal list-inside space-y-2 text-gray-700">
                             <li>
-                                <strong>Select the Arrow Tool:</strong> In the TLDraw toolbar (left side), click on the arrow tool icon.
+                                <strong>Select the Arrow Tool:</strong> Press <kbd className="px-2 py-1 bg-gray-200 rounded text-xs">A</kbd> or click the arrow tool in tldraw's toolbar.
                             </li>
                             <li>
-                                <strong>Draw Connections:</strong> Click and drag from one component to another to create an arrow connection.
+                                <strong>Select a Component:</strong> Click on a component to see its connection handles (blue dots on each side).
+                            </li>
+                            <li>
+                                <strong>Draw from Handles:</strong> Click and drag from a component handle to another component's handle to create a connection.
                             </li>
                             <li>
                                 <strong>Add Labels:</strong> Double-click on the arrow to add text labels (e.g., "HTTPS", "Database Connection").
@@ -43,10 +46,11 @@ export function ConnectionGuide({ isVisible, onClose }: ConnectionGuideProps) {
                             <span role="img" aria-label="light bulb">💡</span> Pro Tips:
                         </h4>
                         <ul className="list-disc list-inside space-y-1 text-blue-800">
-                            <li>Arrows will automatically "stick" to components when you connect them</li>
+                            <li>Arrows automatically snap to component handles for precise connections</li>
+                            <li>Use <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">V</kbd> to switch back to select tool</li>
                             <li>Moving components will keep the arrows connected</li>
-                            <li>Use different arrow styles to represent different types of connections</li>
-                            <li>All connections will be exported to Mermaid diagrams automatically</li>
+                            <li>Double-click arrows to add bend points for custom routing</li>
+                            <li>All connections will be exported to infrastructure diagrams automatically</li>
                         </ul>
                     </div>
 

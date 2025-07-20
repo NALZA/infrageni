@@ -1,8 +1,6 @@
 import React from 'react';
 
 export interface ToolbarProps {
-    connectMode: boolean;
-    setConnectMode: (v: boolean) => void;
     labelMode: boolean;
     setLabelMode: (v: boolean) => void;
     onExport?: () => void;
@@ -12,8 +10,6 @@ export interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
-    connectMode,
-    setConnectMode,
     labelMode,
     setLabelMode,
     onExport,
@@ -55,7 +51,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="relative flex items-center justify-between">
                 {/* Left section - Mode toggles */}
                 <div className="flex items-center gap-3">
-                    {toolbarButton(connectMode, () => setConnectMode(!connectMode), 'Connect')}
                     {toolbarButton(labelMode, () => setLabelMode(!labelMode), 'Label')}
                     {/* Add more mode buttons here as needed */}
                 </div>

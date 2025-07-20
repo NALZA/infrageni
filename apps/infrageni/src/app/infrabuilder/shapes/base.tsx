@@ -3,6 +3,9 @@ import {
     TLBaseShape,
     HTMLContainer,
     Rectangle2d,
+    TLHandle,
+    TLHandleId,
+    Vec,
 } from 'tldraw';
 import { GENERIC_COMPONENTS, useProvider } from '../components';
 import { getProviderIcon } from './provider-icons';
@@ -100,6 +103,57 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
             isFilled: true,
         });
     }
+
+    // Add connection handles on all four sides of the shape
+    override getHandles(shape: T): TLHandle[] {
+        const { w, h } = shape.props;
+        
+        return [
+            // Top handle
+            {
+                id: 'top' as TLHandleId,
+                type: 'vertex',
+                index: 'a1' as any,
+                x: w / 2,
+                y: 0,
+                canBind: true,
+                canSnap: true,
+            },
+            // Right handle  
+            {
+                id: 'right' as TLHandleId,
+                type: 'vertex',
+                index: 'a2' as any,
+                x: w,
+                y: h / 2,
+                canBind: true,
+                canSnap: true,
+            },
+            // Bottom handle
+            {
+                id: 'bottom' as TLHandleId,
+                type: 'vertex',
+                index: 'a3' as any,
+                x: w / 2,
+                y: h,
+                canBind: true,
+                canSnap: true,
+            },
+            // Left handle
+            {
+                id: 'left' as TLHandleId,
+                type: 'vertex',
+                index: 'a4' as any,
+                x: 0,
+                y: h / 2,
+                canBind: true,
+                canSnap: true,
+            },
+        ];
+    }
+
+    // Let tldraw handle arrow connections natively - no custom onHandleDrag needed
+
 
     override indicator(shape: T) {
         return (

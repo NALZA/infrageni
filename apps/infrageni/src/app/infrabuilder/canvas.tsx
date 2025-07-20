@@ -385,6 +385,7 @@ function ReparentingHandler() {
     return null;
 }
 
+
 function DropZone() {
     const editor = useEditor();
     const provider = useProvider();
@@ -393,10 +394,10 @@ function DropZone() {
     useTldrawThemeSync();
     useInitialUrlLoad(); // Load shared canvas state on initial load only
 
-    const [connectMode, setConnectMode] = React.useState(false);
     const [labelMode, setLabelMode] = React.useState(false);
     const [showExportDialog, setShowExportDialog] = React.useState(false);
     const [showConnectionGuide, setShowConnectionGuide] = React.useState(false);
+
 
     React.useEffect(() => {
         const handleDrop = (e: DragEvent) => {
@@ -475,13 +476,12 @@ function DropZone() {
     return (
         <>
             <Toolbar
-                connectMode={connectMode}
-                setConnectMode={setConnectMode}
                 labelMode={labelMode}
                 setLabelMode={setLabelMode}
                 onExport={() => setShowExportDialog(true)}
                 onShowConnectionGuide={() => setShowConnectionGuide(true)}
             />
+            
             {showExportDialog && (
                 <EnhancedExportDialog
                     isOpen={showExportDialog}
