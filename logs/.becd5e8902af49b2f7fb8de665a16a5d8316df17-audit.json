@@ -6,6 +6,16 @@
     "auditLog": "D:\\Projects\\infrageni\\logs\\.becd5e8902af49b2f7fb8de665a16a5d8316df17-audit.json",
     "files": [
         {
+<<<<<<< HEAD
+            "date": 1752565375765,
+            "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-15.log",
+            "hash": "c360a98e4c10fd3b097be359a17b82e1b760e73aaeaaca5ff37e38b2b8785e99"
+        },
+        {
+            "date": 1752589991094,
+            "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-16.log",
+            "hash": "f21657f924434f3856034ef7351ebb22269e391a95a33f99e0dcfde36798bb25"
+=======
             "date": 1752667516929,
             "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-16.log",
             "hash": "1c91de2bcf50b57851c9c47aa145944e8e5c3e95d5e43658beee3bea7210d5ca"
@@ -29,6 +39,7 @@
             "date": 1753012106157,
             "name": "D:\\Projects\\infrageni\\logs\\mcp-puppeteer-2025-07-20.log",
             "hash": "324de315928f75051482d43727b8c8d768c9e60a6e9f119b2406ac52f3940cf8"
+>>>>>>> 2ae92e0ecdf4b55df0d4b44e79a1d127ed72390d
         }
     ],
     "hashType": "sha256"
