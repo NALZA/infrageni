@@ -126,7 +126,7 @@ class DragDropManager {
         const currentParentId = shape.parentId;
         const newParentIdStr = newParentId === this.editor.getCurrentPageId() ? 'page' : newParentId as string;
         const currentParentIdStr = currentParentId === this.editor.getCurrentPageId() ? 'page' : currentParentId as string;
-        
+
         // Check if we're trying to reparent to the same parent
         if (currentParentIdStr === newParentIdStr) {
             return false;
@@ -176,7 +176,7 @@ class DragDropManager {
         // Track this reparenting operation
         this.lastReparentedShapes.set(shapeId, { parentId: currentParentIdStr, timestamp: now });
         this.lastReparentTime = now;
-        
+
         // Clean up old entries (older than 2 seconds)
         const cutoff = now - 2000;
         for (const [key, value] of this.lastReparentedShapes.entries()) {
@@ -184,7 +184,7 @@ class DragDropManager {
                 this.lastReparentedShapes.delete(key);
             }
         }
-        
+
         return true;
     }
 
@@ -309,13 +309,13 @@ function ReparentingHandler() {
                         try {
                             const selectedShapes = editor.getSelectedShapes();
                             if (selectedShapes.length === 0) return;
-                            
+
                             // Double-check that no shapes are being actively manipulated
                             const hasActiveTransforms = selectedShapes.some(shape => {
                                 const pageTransform = editor.getShapePageTransform(shape.id);
                                 return !pageTransform || !isFinite(pageTransform.x) || !isFinite(pageTransform.y);
                             });
-                            
+
                             if (hasActiveTransforms) return;
 
                             const shapesToReparent: { shapeId: TLShapeId; newParentId: TLParentId }[] = [];
@@ -324,27 +324,27 @@ function ReparentingHandler() {
                                 if (shape.type === 'arrow') return;
 
                                 const shapeProps = shape.props as BaseInfraShapeProps;
-                                
+
                                 // Use the shape's current absolute position to determine container
                                 const absoluteTransform = editor.getShapePageTransform(shape.id);
                                 let shapeCenter;
-                                
+
                                 if (absoluteTransform && isFinite(absoluteTransform.x) && isFinite(absoluteTransform.y)) {
-                                    shapeCenter = { 
-                                        x: absoluteTransform.x + (shapeProps.w || 0) / 2, 
-                                        y: absoluteTransform.y + (shapeProps.h || 0) / 2 
+                                    shapeCenter = {
+                                        x: absoluteTransform.x + (shapeProps.w || 0) / 2,
+                                        y: absoluteTransform.y + (shapeProps.h || 0) / 2
                                     };
                                 } else {
                                     // Fallback calculation
                                     const currentParent = shape.parentId !== editor.getCurrentPageId() ? editor.getShape(shape.parentId as TLShapeId) : null;
                                     const absoluteX = currentParent ? shape.x + currentParent.x : shape.x;
                                     const absoluteY = currentParent ? shape.y + currentParent.y : shape.y;
-                                    shapeCenter = { 
-                                        x: absoluteX + (shapeProps.w || 0) / 2, 
-                                        y: absoluteY + (shapeProps.h || 0) / 2 
+                                    shapeCenter = {
+                                        x: absoluteX + (shapeProps.w || 0) / 2,
+                                        y: absoluteY + (shapeProps.h || 0) / 2
                                     };
                                 }
-                                
+
                                 const currentParentId = shape.parentId === editor.getCurrentPageId() ? undefined : shape.parentId;
                                 const newParentId = dragDropManager.findBestContainer(shapeCenter, shape.id, currentParentId);
                                 const currentPageId = editor.getCurrentPageId();
@@ -385,6 +385,10 @@ function ReparentingHandler() {
     return null;
 }
 
+// Connection indicator to show visual feedback during connection mode
+function ConnectionIndicator() {
+    return null; // Simplified for now - connection feedback will be handled in the DropZone component
+}
 
 function DropZone() {
     const editor = useEditor();
@@ -481,7 +485,7 @@ function DropZone() {
                 onExport={() => setShowExportDialog(true)}
                 onShowConnectionGuide={() => setShowConnectionGuide(true)}
             />
-            
+
             {showExportDialog && (
                 <EnhancedExportDialog
                     isOpen={showExportDialog}
@@ -515,6 +519,7 @@ export function Canvas() {
             >
                 <DropZone />
                 <ReparentingHandler />
+                <ConnectionIndicator />
             </Tldraw>
 
             {/* Floating animation elements */}

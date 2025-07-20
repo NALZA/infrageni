@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { EnhancedComponentLibrary } from './enhanced-component-library';
 import { Canvas } from './canvas';
 import { ModeToggle, EducationModeContainer } from './education';
+import { EnhancedExportDialog } from './export';
 
 const InfraBuilder = () => {
     const [search, setSearch] = useState('');
     const [favorites, setFavorites] = useState<string[]>([]);
     const [isEducationMode, setIsEducationMode] = useState(false);
+    const [showExportDialog, setShowExportDialog] = useState(false);
 
     const handleModeChange = (educationMode: boolean) => {
         setIsEducationMode(educationMode);
@@ -43,10 +45,18 @@ const InfraBuilder = () => {
                             search={search}
                             setSearch={setSearch}
                         />
-                        <Canvas />
+                        <Canvas onExport={() => setShowExportDialog(true)} />
                     </div>
                 )}
             </div>
+            
+            {/* Export Dialog - Outside tldraw component */}
+            {showExportDialog && (
+                <EnhancedExportDialog
+                    isOpen={showExportDialog}
+                    onClose={() => setShowExportDialog(false)}
+                />
+            )}
         </div>
     );
 };

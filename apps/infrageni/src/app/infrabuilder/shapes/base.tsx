@@ -104,46 +104,50 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
         });
     }
 
-    // Add connection handles on all four sides of the shape
+    // Enable arrow binding for infrastructure components
+    override canBind = () => {
+        // Only allow binding for non-container shapes
+        // Container shapes (VPC, Subnet, AZ) override this to return false
+        return true;
+    }
+
+    // Add native tldraw handles for better connection UX when using arrow tool
     override getHandles(shape: T): TLHandle[] {
         const { w, h } = shape.props;
         
+        // Only show handles for regular components (not containers)
+        if (shape.props.isBoundingBox) {
+            return [];
+        }
+        
         return [
-            // Top handle
             {
                 id: 'top' as TLHandleId,
                 type: 'vertex',
-                index: 'a1' as any,
                 x: w / 2,
                 y: 0,
                 canBind: true,
                 canSnap: true,
             },
-            // Right handle  
             {
                 id: 'right' as TLHandleId,
                 type: 'vertex',
-                index: 'a2' as any,
                 x: w,
                 y: h / 2,
                 canBind: true,
                 canSnap: true,
             },
-            // Bottom handle
             {
                 id: 'bottom' as TLHandleId,
                 type: 'vertex',
-                index: 'a3' as any,
                 x: w / 2,
                 y: h,
                 canBind: true,
                 canSnap: true,
             },
-            // Left handle
             {
                 id: 'left' as TLHandleId,
                 type: 'vertex',
-                index: 'a4' as any,
                 x: 0,
                 y: h / 2,
                 canBind: true,
@@ -151,8 +155,6 @@ export abstract class BaseInfraShapeUtil<T extends TLBaseShape<string, BaseInfra
             },
         ];
     }
-
-    // Let tldraw handle arrow connections natively - no custom onHandleDrag needed
 
 
     override indicator(shape: T) {

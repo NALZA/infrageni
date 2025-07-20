@@ -12,7 +12,8 @@
       "Bash(npx nx typecheck:*)",
       "Bash(npx nx build:*)",
       "Bash(npm run typecheck:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "mcp__context7__resolve-library-id"
     ],
     "deny": []
   }
